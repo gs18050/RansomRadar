@@ -1,0 +1,27 @@
+﻿  Building 'minispy' with toolset 'WindowsKernelModeDriver10.0' and the 'Universal' target platform.
+  Stamping x64\Debug\minispy.inf
+  Stamping [Version] section with DriverVer=03/16/2026,7.20.55.116
+  IRPCollection.c
+  minispy.vcxproj -> C:\Users\user\workspace\RansomRadar\monitor\IOMonitor\IRPCollectionDrv\filter\x64\Debug\minispy.sys
+  Done Adding Additional Store
+  Successfully signed: C:\Users\user\workspace\RansomRadar\monitor\IOMonitor\IRPCollectionDrv\filter\x64\Debug\minispy.sys
+  
+  Driver is 'Universal'.
+  ........................
+  Signability test complete.
+  
+  Errors:
+  None
+  
+  Warnings:
+  None
+  
+  Catalog generation complete.
+  C:\Users\user\workspace\RansomRadar\monitor\IOMonitor\IRPCollectionDrv\filter\x64\Debug\minispy\minispy.cat
+  Set catalog attribute.
+  WdkVersion: 10.0.26100.0
+  Set catalog attribute.
+  WdkAssemblyVersion: 10.0.26100.6584
+  Done Adding Additional Store
+  Successfully signed: x64\Debug\minispy\minispy.cat
+  

@@ -1,0 +1,2 @@
+C:\Users\user\workspace\Windows-driver-samples\filesys\miniFilter\minispy\user\x64\Debug\minispy.exe
+C:\Users\user\workspace\RansomRadar\monitor\IOMonitor\IRPCollectionDrv\user\x64\Debug\minispy.exe

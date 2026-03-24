@@ -1,0 +1,1 @@
+C:\Users\user\workspace\RansomRadar\monitor\IOMonitor\IRPCollectionDrv\filter\x64\Debug\minispy.sys

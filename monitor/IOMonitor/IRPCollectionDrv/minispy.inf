@@ -1,0 +1,72 @@
+[Version]
+Signature="$WINDOWS NT$"
+Class=ActivityMonitor
+ClassGuid={b86dff51-a31e-4bac-b3cf-e8cfe75c9fc2}
+Provider=%ManufacturerName%
+DriverVer=03/25/2026,1.0.0.0
+
+[DestinationDirs]
+DefaultDestDir=12
+IRPCollection.DriverFiles=12
+
+[DefaultInstall]
+OptionDesc=%ServiceDescription%
+CopyFiles=IRPCollection.DriverFiles
+
+[DefaultInstall.Services]
+AddService=%ServiceName%,,IRPCollection.Service
+
+[DefaultInstall.NTamd64]
+OptionDesc=%ServiceDescription%
+CopyFiles=IRPCollection.DriverFiles
+
+[DefaultInstall.NTamd64.Services]
+AddService=%ServiceName%,,IRPCollection.Service
+n
+[DefaultUninstall]
+DelFiles=IRPCollection.DriverFiles
+
+[DefaultUninstall.Services]
+DelService=%ServiceName%,0x200
+
+[DefaultUninstall.NTamd64]
+DelFiles=IRPCollection.DriverFiles
+
+[DefaultUninstall.NTamd64.Services]
+DelService=%ServiceName%,0x200
+
+[IRPCollection.Service]
+DisplayName=%ServiceName%
+Description=%ServiceDescription%
+ServiceBinary=%12%\IRPCollection.sys
+Dependencies=FltMgr
+ServiceType=2
+StartType=3
+ErrorControl=1
+LoadOrderGroup="FSFilter Activity Monitor"
+AddReg=IRPCollection.AddRegistry
+
+[IRPCollection.AddRegistry]
+HKR,,"DebugFlags",0x00010001,0x0
+HKR,"Instances","DefaultInstance",0x00000000,%DefaultInstance%
+HKR,"Instances\"%Instance1.Name%,"Altitude",0x00000000,%Instance1.Altitude%
+HKR,"Instances\"%Instance1.Name%,"Flags",0x00010001,%Instance1.Flags%
+
+[IRPCollection.DriverFiles]
+IRPCollection.sys
+
+[SourceDisksFiles]
+IRPCollection.sys=1,,
+
+[SourceDisksNames]
+1=%DiskId1%,,,
+
+[Strings]
+ManufacturerName="RansomRadar"
+ServiceName="irpcollection"
+ServiceDescription="RansomRadar IRP Collection Minifilter"
+DiskId1="IRPCollection Installation Media"
+DefaultInstance="IRPCollection Instance"
+Instance1.Name="IRPCollection Instance"
+Instance1.Altitude="370030"
+Instance1.Flags=0x0

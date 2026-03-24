@@ -1,0 +1,581 @@
+ minispy
+
+ Timestamp is 69b730c7 (Mon Mar 16 07:20:55 2026)
+
+ Preferred load address is 0000000140000000
+
+ Start         Length     Name                   Class
+ 0001:00000000 00007630H .text                   CODE
+ 0001:00007630 00001500H .text$mn                CODE
+ 0001:00008b30 00000090H .text$mn$00             CODE
+ 0001:00008bc0 000004c0H .text$mn$21             CODE
+ 0001:00009080 00000340H .text$s                 CODE
+ 0001:000093c0 00000610H .text$unlikely          CODE
+ 0002:00000000 000000d0H .idata$5                DATA
+ 0002:000000d0 00000180H .00cfg                  DATA
+ 0002:00000250 00000160H .gfids                  DATA
+ 0002:000003a4 00000000H .gfids$y                DATA
+ 0002:000003b0 000023d0H .rdata                  DATA
+ 0002:00002780 00000000H .rdata$CastGuardVftablesA DATA
+ 0002:00002780 00000000H .rdata$CastGuardVftablesC DATA
+ 0002:00002780 00000270H .rdata$zzzdbg           DATA
+ 0002:000029f0 000004a4H .xdata                  DATA
+ 0003:00000000 00000880H .data                   DATA
+ 0003:00000880 00000030H .bss                    DATA
+ 0004:00000000 00000414H .pdata                  DATA
+ 0005:00000000 00000280H PAGE                    CODE
+ 0005:00000280 0000012cH PAGE$s                  CODE
+ 0006:00000000 00000120H INIT                    CODE
+ 0006:00000120 00000024H INIT$s                  CODE
+ 0006:00000144 00000028H .idata$2                CODE
+ 0006:0000016c 00000014H .idata$3                CODE
+ 0006:00000180 000000d0H .idata$4                CODE
+ 0006:00000250 0000020eH .idata$6                CODE
+ 0007:00000000 000000b0H .rsrc$01                DATA
+ 0007:000000b0 000003a8H .rsrc$02                DATA
+
+  Address         Publics by Value              Rva+Base               Lib:Object
+
+ 0000:00000000       __AbsoluteZero             0000000000000000     <absolute>
+ 0000:00000000       ___safe_se_handler_count   0000000000000000     <absolute>
+ 0000:00000000       ___safe_se_handler_table   0000000000000000     <absolute>
+ 0000:00000000       __arm64x_extra_rfe_table   0000000000000000     <absolute>
+ 0000:00000000       __arm64x_extra_rfe_table_size 0000000000000000     <absolute>
+ 0000:00000000       __arm64x_native_entrypoint 0000000000000000     <absolute>
+ 0000:00000000       __arm64x_redirection_metadata 0000000000000000     <absolute>
+ 0000:00000000       __arm64x_redirection_metadata_count 0000000000000000     <absolute>
+ 0000:00000000       __dynamic_value_reloc_table 0000000000000000     <absolute>
+ 0000:00000000       __enclave_config           0000000000000000     <absolute>
+ 0000:00000000       __guard_check_icall_a64n_fptr 0000000000000000     <absolute>
+ 0000:00000000       __guard_eh_cont_count      0000000000000000     <absolute>
+ 0000:00000000       __guard_eh_cont_table      0000000000000000     <absolute>
+ 0000:00000000       __guard_iat_count          0000000000000000     <absolute>
+ 0000:00000000       __guard_iat_table          0000000000000000     <absolute>
+ 0000:00000000       __guard_longjmp_count      0000000000000000     <absolute>
+ 0000:00000000       __guard_longjmp_table      0000000000000000     <absolute>
+ 0000:00000000       __hybrid_auxiliary_delayload_iat 0000000000000000     <absolute>
+ 0000:00000000       __hybrid_auxiliary_delayload_iat_copy 0000000000000000     <absolute>
+ 0000:00000000       __hybrid_auxiliary_iat     0000000000000000     <absolute>
+ 0000:00000000       __hybrid_auxiliary_iat_copy 0000000000000000     <absolute>
+ 0000:00000000       __hybrid_code_map          0000000000000000     <absolute>
+ 0000:00000000       __hybrid_code_map_count    0000000000000000     <absolute>
+ 0000:00000000       __hybrid_image_info_bitfield 0000000000000000     <absolute>
+ 0000:00000000       __volatile_metadata        0000000000000000     <absolute>
+ 0000:00000000       __x64_code_ranges_to_entry_points 0000000000000000     <absolute>
+ 0000:00000000       __x64_code_ranges_to_entry_points_count 0000000000000000     <absolute>
+ 0000:00000055       __guard_fids_count         0000000000000055     <absolute>
+ 0000:00014500       __guard_flags              0000000000014500     <absolute>
+ 0001:00000000       _RNvCs32TFkEopOis_7___rustc12___rust_alloc 0000000140001000 f   minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0001:00000020       _RNvCs32TFkEopOis_7___rustc14___rust_dealloc 0000000140001020 f   minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0001:00000030       _RNvCs32TFkEopOis_7___rustc14___rust_realloc 0000000140001030 f   minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0001:00000090       _RNvCs32TFkEopOis_7___rustc17rust_begin_unwind 0000000140001090 f   minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0001:00000090       _RNvCs32TFkEopOis_7___rustc26___rust_alloc_error_handler 0000000140001090 f   minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0001:00000150       _RNvCs32TFkEopOis_7___rustc35___rust_no_alloc_shim_is_unstable_v2 0000000140001150 f   minifilter_helper:minifilter_helper-50e8df6ec63647cb.ce57on6jtqw8an7f8gp76meb4.rcgu.o
+ 0001:00000150       __CxxFrameHandler3         0000000140001150 f   minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0001:00000160       __helper_add_record        0000000140001160 f   minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0001:00000690       __helper_flush_and_copy_buf 0000000140001690 f   minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0001:00000cc0       __helper_is_blacklist      0000000140001cc0 f   minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0001:00000ce0       __helper_log2              0000000140001ce0 f   minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0001:00000cf0       __helper_log_file_lock     0000000140001cf0 f   minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0001:00000d50       __helper_log_file_unlock   0000000140001d50 f   minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0001:00000d90       _RNvMNtCsl9UBPWqc0Zl_5alloc6stringNtB2_6String10from_utf16 0000000140001d90 f   minifilter_helper:alloc-72c9dd0c1226daaf.alloc.f67659a7e049b91d-cgu.0.rcgu.o
+ 0001:00001080       _RNvNvNtCsl9UBPWqc0Zl_5alloc3fmt6format12format_inner 0000000140002080 f   minifilter_helper:alloc-72c9dd0c1226daaf.alloc.f67659a7e049b91d-cgu.0.rcgu.o
+ 0001:00001b50       _RNvMs2_NtNtNtCseuqlQlvfqSz_4core3num3imp6bignumNtB5_8Big32x4010mul_digits 0000000140002b50 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:00001e70       _RNvMs2_NtNtNtCseuqlQlvfqSz_4core3num3imp6bignumNtB5_8Big32x408mul_pow2 0000000140002e70 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:00002070       _RNvMsa_NtCseuqlQlvfqSz_4core3fmtNtB5_9Formatter12pad_integral 0000000140003070 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:00002a20       _RNvMsa_NtCseuqlQlvfqSz_4core3fmtNtB5_9Formatter25debug_tuple_field1_finish 0000000140003a20 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:00002b60       _RNvMsa_NtCseuqlQlvfqSz_4core3fmtNtB5_9Formatter3pad 0000000140003b60 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:00002fa0       _RNvMsa_NtCseuqlQlvfqSz_4core3fmtNtB5_9Formatter9write_str 0000000140003fa0 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:00002fa0       _RNvXsb_NtCseuqlQlvfqSz_4core3fmtNtB5_9FormatterNtB5_5Write9write_str 0000000140003fa0 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:00002fc0       _RNvNtCseuqlQlvfqSz_4core3fmt5write 0000000140003fc0 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:00003180       _RNvNtNtCseuqlQlvfqSz_4core3str5count14do_count_chars 0000000140004180 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:000037a0       _RNvNtNtNtCseuqlQlvfqSz_4core3num3imp7flt2dec17digits_to_dec_str 00000001400047a0 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:00003920       _RNvNtNtNtNtNtCseuqlQlvfqSz_4core3num3imp7flt2dec8strategy5grisu16format_exact_opt 0000000140004920 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:00003d60       _RNvNtNtNtNtNtCseuqlQlvfqSz_4core3num3imp7flt2dec8strategy5grisu19format_shortest_opt 0000000140004d60 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:000043d0       _RNvNtNtNtNtNtCseuqlQlvfqSz_4core3num3imp7flt2dec8strategy6dragon12format_exact 00000001400053d0 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:00005350       _RNvNtNtNtNtNtCseuqlQlvfqSz_4core3num3imp7flt2dec8strategy6dragon15format_shortest 0000000140006350 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:00006640       _RNvNtNtNtNtNtCseuqlQlvfqSz_4core3num3imp7flt2dec8strategy6dragon9mul_pow10 0000000140007640 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:00006cd0       _RNvXNtNtNtCseuqlQlvfqSz_4core3fmt3num3imphNtB6_7Display3fmt 0000000140007cd0 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:00006d80       _RNvXs0_NtNtCseuqlQlvfqSz_4core3fmt8buildersNtB5_10PadAdapterNtB7_5Write10write_char 0000000140007d80 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:00006df0       _RNvXs0_NtNtCseuqlQlvfqSz_4core3fmt8buildersNtB5_10PadAdapterNtB7_5Write9write_str 0000000140007df0 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:000070d0       _RNvXs7_NtNtCseuqlQlvfqSz_4core3fmt5floatdNtB7_7Display3fmt 00000001400080d0 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:00007110       _RNvXs8_NtCseuqlQlvfqSz_4core3fmtNtB5_9ArgumentsNtB5_7Display3fmt 0000000140008110 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:000072f0       _RNvXsd_NtNtNtCseuqlQlvfqSz_4core3fmt3num3impyNtB9_7Display3fmt 00000001400082f0 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:000072f0       _RNvXsi_NtNtNtCseuqlQlvfqSz_4core3fmt3num3impjNtB9_7Display3fmt 00000001400082f0 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:00007400       _RNvXsi_NtCseuqlQlvfqSz_4core3fmteNtB5_7Display3fmt 0000000140008400 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:00007440       _RNvNtNtCs4ByR6s6adON_4libm4math4log24log2 0000000140008440 f   minifilter_helper:libm-a0e88a548b54f015.libm.35a5a7b2c37f4913-cgu.12.rcgu.o
+ 0001:00007630       IRPCollectionPreOperation  0000000140008630 f   IRPCollection.obj
+ 0001:000076f0       IRPCollectionPostOperation 00000001400086f0 f   IRPCollection.obj
+ 0001:00007750       IRPCollectionPreOperationNoPostOperation 0000000140008750 f   IRPCollection.obj
+ 0001:000077a0       CalculateEntropyBasedOnBit 00000001400087a0 f   IRPCollection.obj
+ 0001:000079a0       CalculateEntropyBasedOnByte 00000001400089a0 f   IRPCollection.obj
+ 0001:00007b40       GetFileName                0000000140008b40 f   IRPCollection.obj
+ 0001:00007c60       GetProcessBasicInfo        0000000140008c60 f   IRPCollection.obj
+ 0001:00007cb0       GetProcessImageName        0000000140008cb0 f   IRPCollection.obj
+ 0001:00007db0       IRPCollectionDoRequestOperationStatus 0000000140008db0 f   IRPCollection.obj
+ 0001:00007e40       IRPCollectionOperationStatusCallback 0000000140008e40 f   IRPCollection.obj
+ 0001:00007ee0       InitializeZwQueryInformationProcess 0000000140008ee0 f   IRPCollection.obj
+ 0001:00007f30       MmGetSystemAddressForMdlSafe 0000000140008f30 f i IRPCollection.obj
+ 0001:00007f90       ProcessIRP                 0000000140008f90 f   IRPCollection.obj
+ 0001:000085f0       WriteToLog                 00000001400095f0 f   IRPCollection.obj
+ 0001:00008840       getCurrentTime             0000000140009840 f   IRPCollection.obj
+ 0001:00008870       isTheIrpDeleteFile         0000000140009870 f   IRPCollection.obj
+ 0001:00008900       isTheIrpRenameFile         0000000140009900 f   IRPCollection.obj
+ 0001:00008950       __report_gsfailure         0000000140009950 f   BufferOverflowFastFailK:gs_report.obj
+ 0001:00008960       _guard_check_icall_nop     0000000140009960 f i BufferOverflowFastFailK:guard_check.obj
+ 0001:00008970       DbgPrint                   0000000140009970 f   ntoskrnl:ntoskrnl.exe
+ 0001:00008976       FsRtlGetFileSize           0000000140009976 f   ntoskrnl:ntoskrnl.exe
+ 0001:0000897c       __GSHandlerCheck           000000014000997c f   ntoskrnl:gshandler.obj
+ 0001:0000899c       __GSHandlerCheckCommon     000000014000999c f   ntoskrnl:gshandler.obj
+ 0001:000089fc       wcslen                     00000001400099fc f   ntoskrnl:ntoskrnl.exe
+ 0001:00008a10       ExFreePool                 0000000140009a10 f   ntoskrnl:ntoskrnl.exe
+ 0001:00008a20       ExAllocatePool2            0000000140009a20 f   ntoskrnl:ntoskrnl.exe
+ 0001:00008a30       __chkstk                   0000000140009a30 f   ntoskrnl:ntoskrnl.exe
+ 0001:00008a40       __cpu_features_init        0000000140009a40 f   ntoskrnl:cpuinfo.obj
+ 0001:00008af5       FltRegisterFilter          0000000140009af5 f   fltMgr:FLTMGR.SYS
+ 0001:00008afb       FltUnregisterFilter        0000000140009afb f   fltMgr:FLTMGR.SYS
+ 0001:00008b01       FltStartFiltering          0000000140009b01 f   fltMgr:FLTMGR.SYS
+ 0001:00008b07       FltRequestOperationStatusCallback 0000000140009b07 f   fltMgr:FLTMGR.SYS
+ 0001:00008b0d       FltGetFileNameInformation  0000000140009b0d f   fltMgr:FLTMGR.SYS
+ 0001:00008b13       FltCreateFile              0000000140009b13 f   fltMgr:FLTMGR.SYS
+ 0001:00008b19       FltWriteFile               0000000140009b19 f   fltMgr:FLTMGR.SYS
+ 0001:00008b1f       FltClose                   0000000140009b1f f   fltMgr:FLTMGR.SYS
+ 0001:00008b25       FltGetIrpName              0000000140009b25 f   fltMgr:FLTMGR.SYS
+ 0001:00008b40       __security_check_cookie    0000000140009b40 f   BufferOverflowFastFailK:amdsecgs.obj
+ 0001:00008b70       _guard_dispatch_icall_nop  0000000140009b70 f   BufferOverflowFastFailK:guard_dispatch.obj
+ 0001:00008b90       _guard_xfg_dispatch_icall_nop 0000000140009b90 f   BufferOverflowFastFailK:guard_xfg_dispatch.obj
+ 0001:00008bc0       memcpy                     0000000140009bc0 f   ntoskrnl:memcpy.obj
+ 0001:00008bc0       memmove                    0000000140009bc0 f   ntoskrnl:memcpy.obj
+ 0001:00008e80       memset                     0000000140009e80 f   ntoskrnl:memset.obj
+ 0001:00008e80       memset_$fo_default$        0000000140009e80     ntoskrnl:memset.obj
+ 0001:00008fc0       __memset_repmovs           0000000140009fc0 f   ntoskrnl:memset.obj
+ 0001:00009040       __memset_query             000000014000a040 f   ntoskrnl:memset.obj
+ 0001:00009080       ??_C@_0DC@LHMNDCKL@IRPCollection?$CBIRPCollectionPreO@FNODOBFM@ 000000014000a080     IRPCollection.obj
+ 0001:000090c0       ??_C@_0GA@KDNMJLKL@IRPCollection?$CBIRPCollectionPreO@FNODOBFM@ 000000014000a0c0     IRPCollection.obj
+ 0001:00009120       ??_C@_0DN@GGFLJIJE@IRPCollection?$CBIRPCollectionOper@FNODOBFM@ 000000014000a120     IRPCollection.obj
+ 0001:00009160       ??_C@_0FN@OKJBEHAC@IRPCollection?$CBIRPCollectionOper@FNODOBFM@ 000000014000a160     IRPCollection.obj
+ 0001:000091c0       ??_C@_0DD@HGJCEEG@IRPCollection?$CBIRPCollectionPost@FNODOBFM@ 000000014000a1c0     IRPCollection.obj
+ 0001:00009200       ??_C@_0EB@FENOANFI@IRPCollection?$CBIRPCollectionPreO@FNODOBFM@ 000000014000a200     IRPCollection.obj
+ 0001:00009250       ??_C@_1DO@IACJDAJF@?$AA?2?$AAD?$AAo?$AAs?$AAD?$AAe?$AAv?$AAi?$AAc?$AAe?$AAs?$AA?2?$AAC?$AA?3?$AA?2@FNODOBFM@ 000000014000a250     IRPCollection.obj
+ 0001:00009290       ??_C@_0BH@NIAKFMAF@IRQL?5?$CB?$DN?5PASSIVE_LEVEL?6@FNODOBFM@ 000000014000a290     IRPCollection.obj
+ 0001:000092b0       ??_C@_1DE@MLPIADGK@?$AAZ?$AAw?$AAQ?$AAu?$AAe?$AAr?$AAy?$AAI?$AAn?$AAf?$AAo?$AAr?$AAm?$AAa?$AAt@FNODOBFM@ 000000014000a2b0     IRPCollection.obj
+ 0001:000092f0       ??_C@_0CK@GFHPICJL@Cannot?5resolve?5ZwQueryInformati@FNODOBFM@ 000000014000a2f0     IRPCollection.obj
+ 0001:00009320       ??_C@_0CP@OEHFIBDL@?$FLhello?5fail?$FN?3?5Failed?5to?5get?5pro@FNODOBFM@ 000000014000a320     IRPCollection.obj
+ 0001:00009350       ??_C@_0BI@ENOHDBPC@?$FLhello?$FN?3?5time?5to?5flush?6@FNODOBFM@ 000000014000a350     IRPCollection.obj
+ 0001:00009370       ??_C@_0BM@JJLNINKD@?$FLhello?$FN?3?5flush?5is?5ok?3?5?$CFlld?6@FNODOBFM@ 000000014000a370     IRPCollection.obj
+ 0001:00009390       ??_C@_0CK@JFCFIJIL@?$FLhello?$FN?3?5flush?5fails?3?5copy?5flag@FNODOBFM@ 000000014000a390     IRPCollection.obj
+ 0001:00009620       _RNvNtCsl9UBPWqc0Zl_5alloc5alloc18handle_alloc_error 000000014000a620 f   minifilter_helper:alloc-72c9dd0c1226daaf.alloc.f67659a7e049b91d-cgu.0.rcgu.o
+ 0001:00009640       _RNvNtCsl9UBPWqc0Zl_5alloc7raw_vec12handle_error 000000014000a640 f   minifilter_helper:alloc-72c9dd0c1226daaf.alloc.f67659a7e049b91d-cgu.0.rcgu.o
+ 0001:00009660       _RNvNtCsl9UBPWqc0Zl_5alloc7raw_vec17capacity_overflow 000000014000a660 f   minifilter_helper:alloc-72c9dd0c1226daaf.alloc.f67659a7e049b91d-cgu.0.rcgu.o
+ 0001:00009690       _RINvNtCseuqlQlvfqSz_4core9panicking13assert_failedyyEB4_ 000000014000a690 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:000096d0       _RNvNtCseuqlQlvfqSz_4core6option13unwrap_failed 000000014000a6d0 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:000096f0       _RNvNtCseuqlQlvfqSz_4core6result13unwrap_failed 000000014000a6f0 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:00009750       _RNvNtCseuqlQlvfqSz_4core9panicking18panic_bounds_check 000000014000a750 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:00009790       _RNvNtCseuqlQlvfqSz_4core9panicking19assert_failed_inner 000000014000a790 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:00009890       _RNvNtCseuqlQlvfqSz_4core9panicking5panic 000000014000a890 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:000098b0       _RNvNtCseuqlQlvfqSz_4core9panicking9panic_fmt 000000014000a8b0 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:000098e0       _RNvNtNtCseuqlQlvfqSz_4core5slice5index16slice_index_fail 000000014000a8e0 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:000099b0       _RNvNtNtCseuqlQlvfqSz_4core9panicking11panic_const23panic_const_div_by_zero 000000014000a9b0 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00000000       __imp_FltClose             000000014000b000     fltMgr:FLTMGR.SYS
+ 0002:00000008       __imp_FltWriteFile         000000014000b008     fltMgr:FLTMGR.SYS
+ 0002:00000010       __imp_FltCreateFile        000000014000b010     fltMgr:FLTMGR.SYS
+ 0002:00000018       __imp_FltGetFileNameInformation 000000014000b018     fltMgr:FLTMGR.SYS
+ 0002:00000020       __imp_FltRequestOperationStatusCallback 000000014000b020     fltMgr:FLTMGR.SYS
+ 0002:00000028       __imp_FltStartFiltering    000000014000b028     fltMgr:FLTMGR.SYS
+ 0002:00000030       __imp_FltUnregisterFilter  000000014000b030     fltMgr:FLTMGR.SYS
+ 0002:00000038       __imp_FltRegisterFilter    000000014000b038     fltMgr:FLTMGR.SYS
+ 0002:00000040       __imp_FltGetIrpName        000000014000b040     fltMgr:FLTMGR.SYS
+ 0002:00000048       \177FLTMGR_NULL_THUNK_DATA 000000014000b048     fltMgr:FLTMGR.SYS
+ 0002:00000050       __imp_FsRtlGetFileSize     000000014000b050     ntoskrnl:ntoskrnl.exe
+ 0002:00000058       __imp_wcslen               000000014000b058     ntoskrnl:ntoskrnl.exe
+ 0002:00000060       __imp_PsGetCurrentThreadId 000000014000b060     ntoskrnl:ntoskrnl.exe
+ 0002:00000068       __imp_ExAllocatePool2      000000014000b068     ntoskrnl:ntoskrnl.exe
+ 0002:00000070       __imp___chkstk             000000014000b070     ntoskrnl:ntoskrnl.exe
+ 0002:00000078       __imp_ObfDereferenceObject 000000014000b078     ntoskrnl:ntoskrnl.exe
+ 0002:00000080       __imp_ObReferenceObjectByHandle 000000014000b080     ntoskrnl:ntoskrnl.exe
+ 0002:00000088       __imp_IoGetTopLevelIrp     000000014000b088     ntoskrnl:ntoskrnl.exe
+ 0002:00000090       __imp_MmMapLockedPagesSpecifyCache 000000014000b090     ntoskrnl:ntoskrnl.exe
+ 0002:00000098       __imp_KeQuerySystemTimePrecise 000000014000b098     ntoskrnl:ntoskrnl.exe
+ 0002:000000a0       __imp_KeGetCurrentIrql     000000014000b0a0     ntoskrnl:ntoskrnl.exe
+ 0002:000000a8       __imp_DbgPrint             000000014000b0a8     ntoskrnl:ntoskrnl.exe
+ 0002:000000b0       __imp_MmGetSystemRoutineAddress 000000014000b0b0     ntoskrnl:ntoskrnl.exe
+ 0002:000000b8       __imp_ExFreePool           000000014000b0b8     ntoskrnl:ntoskrnl.exe
+ 0002:000000c0       __imp_RtlInitUnicodeString 000000014000b0c0     ntoskrnl:ntoskrnl.exe
+ 0002:000000c8       \177ntoskrnl_NULL_THUNK_DATA 000000014000b0c8     ntoskrnl:ntoskrnl.exe
+ 0002:000000d0       __guard_check_icall_fptr   000000014000b0d0     BufferOverflowFastFailK:guard_support.obj
+ 0002:000000d8       __guard_dispatch_icall_fptr 000000014000b0d8     BufferOverflowFastFailK:guard_support.obj
+ 0002:000000e0       __guard_xfg_check_icall_fptr 000000014000b0e0     BufferOverflowFastFailK:guard_support.obj
+ 0002:000000e8       __guard_xfg_dispatch_icall_fptr 000000014000b0e8     BufferOverflowFastFailK:guard_support.obj
+ 0002:000000f0       __guard_xfg_table_dispatch_icall_fptr 000000014000b0f0     BufferOverflowFastFailK:guard_support.obj
+ 0002:000000f8       __castguard_check_failure_os_handled_fptr 000000014000b0f8     BufferOverflowFastFailK:guard_support.obj
+ 0002:00000100       __uma_functions            000000014000b100     BufferOverflowFastFailK:loadcfg.obj
+ 0002:00000250       __guard_fids_table         000000014000b250     <linker-defined>
+ 0002:000003b0       Callbacks                  000000014000b3b0     IRPCollection.obj
+ 0002:000008b0       FilterRegistration         000000014000b8b0     IRPCollection.obj
+ 0002:00000920       __real@0000000000000000    000000014000b920     IRPCollection.obj
+ 0002:00000930       __xmm@80000000000000008000000000000000 000000014000b930     IRPCollection.obj
+ 0002:00001320       __xmm@0000000000000000000000000000bfbf 000000014000c320     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00001330       __xmm@00000000000000010000000000000001 000000014000c330     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00001340       __xmm@01010101010101010101010101010101 000000014000c340     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00001908       _RNvNtNtNtNtNtCseuqlQlvfqSz_4core3num3imp7flt2dec8strategy5grisu12CACHED_POW10 000000014000c908     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00002510       __real@3fe0000000000000    000000014000d510     minifilter_helper:libm-a0e88a548b54f015.libm.35a5a7b2c37f4913-cgu.12.rcgu.o
+ 0002:00002518       __real@4350000000000000    000000014000d518     minifilter_helper:libm-a0e88a548b54f015.libm.35a5a7b2c37f4913-cgu.12.rcgu.o
+ 0002:00002520       __real@bff0000000000000    000000014000d520     minifilter_helper:libm-a0e88a548b54f015.libm.35a5a7b2c37f4913-cgu.12.rcgu.o
+ 0002:00002528       __real@4000000000000000    000000014000d528     minifilter_helper:libm-a0e88a548b54f015.libm.35a5a7b2c37f4913-cgu.12.rcgu.o
+ 0002:00002530       __real@3fc2f112df3e5244    000000014000d530     minifilter_helper:libm-a0e88a548b54f015.libm.35a5a7b2c37f4913-cgu.12.rcgu.o
+ 0002:00002538       __real@3fc7466496cb03de    000000014000d538     minifilter_helper:libm-a0e88a548b54f015.libm.35a5a7b2c37f4913-cgu.12.rcgu.o
+ 0002:00002540       __xmm@00000000000000003fc39a09d078c69f 000000014000d540     minifilter_helper:libm-a0e88a548b54f015.libm.35a5a7b2c37f4913-cgu.12.rcgu.o
+ 0002:00002550       __xmm@3fd24924942293593fcc71c51d8e78af 000000014000d550     minifilter_helper:libm-a0e88a548b54f015.libm.35a5a7b2c37f4913-cgu.12.rcgu.o
+ 0002:00002560       __xmm@3fe55555555555933fd999999997fa04 000000014000d560     minifilter_helper:libm-a0e88a548b54f015.libm.35a5a7b2c37f4913-cgu.12.rcgu.o
+ 0002:00002570       __real@ffffffff00000000    000000014000d570     minifilter_helper:libm-a0e88a548b54f015.libm.35a5a7b2c37f4913-cgu.12.rcgu.o
+ 0002:00002578       __real@3ff7154765200000    000000014000d578     minifilter_helper:libm-a0e88a548b54f015.libm.35a5a7b2c37f4913-cgu.12.rcgu.o
+ 0002:00002580       __xmm@3de705fc2eefa2003ff7154765200000 000000014000d580     minifilter_helper:libm-a0e88a548b54f015.libm.35a5a7b2c37f4913-cgu.12.rcgu.o
+ 0002:00002590       _load_config_used          000000014000d590     BufferOverflowFastFailK:loadcfg.obj
+ 0003:00000000       VALUE_TO_1_BIT_COUNT       000000014000e000     IRPCollection.obj
+ 0003:00000800       OperationStatusCtx         000000014000e800     IRPCollection.obj
+ 0003:00000810       __security_cookie          000000014000e810     BufferOverflowFastFailK:gs_support.obj
+ 0003:00000818       __security_cookie_complement 000000014000e818     BufferOverflowFastFailK:gs_support.obj
+ 0003:00000840       __isa_info                 000000014000e840     ntoskrnl:cpuinfo.obj
+ 0003:00000880       gTraceFlags                000000014000e880     IRPCollection.obj
+ 0003:000008a0       gFilterHandle              000000014000e8a0     <common>
+ 0003:000008a8       ZwQueryInformationProcess  000000014000e8a8     <common>
+ 0005:00000000       IRPCollectionInstanceSetup 0000000140010000 f   IRPCollection.obj
+ 0005:00000080       IRPCollectionInstanceTeardownStart 0000000140010080 f   IRPCollection.obj
+ 0005:00000100       IRPCollectionInstanceTeardownComplete 0000000140010100 f   IRPCollection.obj
+ 0005:00000180       IRPCollectionUnload        0000000140010180 f   IRPCollection.obj
+ 0005:00000200       IRPCollectionInstanceQueryTeardown 0000000140010200 f   IRPCollection.obj
+ 0005:00000280       ??_C@_0DD@DMMFBBHL@IRPCollection?$CBIRPCollectionInst@NNGAKEGL@ 0000000140010280     IRPCollection.obj
+ 0005:000002c0       ??_C@_0DL@PMHMDMBG@IRPCollection?$CBIRPCollectionInst@NNGAKEGL@ 00000001400102c0     IRPCollection.obj
+ 0005:00000300       ??_C@_0DL@KAHBDLHL@IRPCollection?$CBIRPCollectionInst@NNGAKEGL@ 0000000140010300     IRPCollection.obj
+ 0005:00000340       ??_C@_0DO@BBAPJHLE@IRPCollection?$CBIRPCollectionInst@NNGAKEGL@ 0000000140010340     IRPCollection.obj
+ 0005:00000380       ??_C@_0CM@CKFEJDHK@IRPCollection?$CBIRPCollectionUnlo@NNGAKEGL@ 0000000140010380     IRPCollection.obj
+ 0006:00000000       DriverEntry                0000000140011000 f   IRPCollection.obj
+ 0006:000000c0       GsDriverEntry              00000001400110c0 f   BufferOverflowFastFailK:gs_driverentry.obj
+ 0006:000000ec       __security_init_cookie     00000001400110ec f   BufferOverflowFastFailK:gs_support.obj
+ 0006:00000120       ??_C@_0CE@DENAKJDB@IRPCollection?$CBDriverEntry?3?5Ente@PBOPGDP@ 0000000140011120     IRPCollection.obj
+ 0006:00000144       __IMPORT_DESCRIPTOR_ntoskrnl 0000000140011144     ntoskrnl:ntoskrnl.exe
+ 0006:00000158       __IMPORT_DESCRIPTOR_FLTMGR 0000000140011158     fltMgr:FLTMGR.SYS
+ 0006:0000016c       __NULL_IMPORT_DESCRIPTOR   000000014001116c     ntoskrnl:ntoskrnl.exe
+
+ entry point at        0006:000000c0
+
+ Static symbols
+
+ 0002:ffff5000       __guard_fids_IRPCollectionPreOperation 0000000140000000     IRPCollection.obj
+ 0002:ffff5000       __guard_fids__             0000000140000000     IRPCollection.obj
+ 0002:ffff5000       __guard_fids__             0000000140000000     BufferOverflowFastFailK:guard_support.obj
+ 0002:ffff5000       __guard_fids__             0000000140000000     BufferOverflowFastFailK:guard_support.obj
+ 0002:ffff5000       __guard_fids__guard_icall_checks_enforced 0000000140000000     BufferOverflowFastFailK:guard_support.obj
+ 0000:fffec000       .debug$S                   0000000140000000     fltMgr:FLTMGR.SYS
+ 0000:fffec000       .debug$S                   0000000140000000     fltMgr:FLTMGR.SYS
+ 0000:fffec000       .debug$S                   0000000140000000     fltMgr:FLTMGR.SYS
+ 0000:fffec000       .debug$S                   0000000140000000     fltMgr:FLTMGR.SYS
+ 0000:fffec000       .debug$S                   0000000140000000     fltMgr:FLTMGR.SYS
+ 0000:fffec000       .debug$S                   0000000140000000     fltMgr:FLTMGR.SYS
+ 0000:fffec000       .debug$S                   0000000140000000     fltMgr:FLTMGR.SYS
+ 0000:fffec000       .debug$S                   0000000140000000     fltMgr:FLTMGR.SYS
+ 0000:fffec000       .debug$S                   0000000140000000     fltMgr:FLTMGR.SYS
+ 0000:fffec000       .debug$S                   0000000140000000     ntoskrnl:ntoskrnl.exe
+ 0000:fffec000       .debug$S                   0000000140000000     ntoskrnl:ntoskrnl.exe
+ 0000:fffec000       .debug$S                   0000000140000000     ntoskrnl:ntoskrnl.exe
+ 0000:fffec000       .debug$S                   0000000140000000     ntoskrnl:ntoskrnl.exe
+ 0000:fffec000       .debug$S                   0000000140000000     ntoskrnl:ntoskrnl.exe
+ 0000:fffec000       .debug$S                   0000000140000000     ntoskrnl:ntoskrnl.exe
+ 0000:fffec000       .debug$S                   0000000140000000     ntoskrnl:ntoskrnl.exe
+ 0000:fffec000       .debug$S                   0000000140000000     ntoskrnl:ntoskrnl.exe
+ 0000:fffec000       .debug$S                   0000000140000000     ntoskrnl:ntoskrnl.exe
+ 0000:fffec000       .debug$S                   0000000140000000     ntoskrnl:ntoskrnl.exe
+ 0000:fffec000       .debug$S                   0000000140000000     ntoskrnl:ntoskrnl.exe
+ 0000:fffec000       .debug$S                   0000000140000000     ntoskrnl:ntoskrnl.exe
+ 0000:fffec000       .debug$S                   0000000140000000     ntoskrnl:ntoskrnl.exe
+ 0000:fffec000       .debug$S                   0000000140000000     ntoskrnl:ntoskrnl.exe
+ 0000:fffec000       .debug$S                   0000000140000000     ntoskrnl:ntoskrnl.exe
+ 0000:fffec000       .debug$S                   0000000140000000     ntoskrnl:ntoskrnl.exe
+ 0002:ffff5134       __guard_fids__             0000000140000134     IRPCollection.obj
+ 0001:000000a0       _RNvXs1_NtCs5EZ1BJJQ9kk_17minifilter_helper6commonNtB5_13OperationTypeNtNtCseuqlQlvfqSz_4core3fmt5Debug3fmt 00000001400010a0 f   minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0001:000000d0       _RNvXs1g_NtCseuqlQlvfqSz_4core3fmtRuNtB6_5Debug3fmtCs5EZ1BJJQ9kk_17minifilter_helper 00000001400010d0 f   minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0001:000000f0       _RNvXs1q_NtCsl9UBPWqc0Zl_5alloc6stringNtB6_14FromUtf16ErrorNtNtCseuqlQlvfqSz_4core3fmt5Debug3fmt 00000001400010f0 f   minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0001:00000130       _RNvXsq_NtCsl9UBPWqc0Zl_5alloc6stringNtB5_6StringNtNtCseuqlQlvfqSz_4core3fmt7Display3fmt 0000000140001130 f   minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0001:00000d70       _RINvNtCseuqlQlvfqSz_4core3ptr13drop_in_placeNtNtCsl9UBPWqc0Zl_5alloc6string6StringEBK_ 0000000140001d70 f   minifilter_helper:alloc-72c9dd0c1226daaf.alloc.f67659a7e049b91d-cgu.0.rcgu.o
+ 0001:00001030       ?dtor$11@?0?_RNvMNtCsl9UBPWqc0Zl_5alloc6stringNtB2_6String10from_utf16@4HA 0000000140002030 f   minifilter_helper:alloc-72c9dd0c1226daaf.alloc.f67659a7e049b91d-cgu.0.rcgu.o
+ 0001:00001220       ?dtor$22@?0?_RNvNvNtCsl9UBPWqc0Zl_5alloc3fmt6format12format_inner@4HA 0000000140002220 f   minifilter_helper:alloc-72c9dd0c1226daaf.alloc.f67659a7e049b91d-cgu.0.rcgu.o
+ 0001:00001260       _RNvXsK_NtCseuqlQlvfqSz_4core3fmtNtB5_5ErrorNtB5_5Debug3fmt 0000000140002260 f   minifilter_helper:alloc-72c9dd0c1226daaf.alloc.f67659a7e049b91d-cgu.0.rcgu.o
+ 0001:00001280       _RNvXsZ_NtCsl9UBPWqc0Zl_5alloc6stringNtB5_6StringNtNtCseuqlQlvfqSz_4core3fmt5Write10write_char 0000000140002280 f   minifilter_helper:alloc-72c9dd0c1226daaf.alloc.f67659a7e049b91d-cgu.0.rcgu.o
+ 0001:00001390       _RNvXsZ_NtCsl9UBPWqc0Zl_5alloc6stringNtB5_6StringNtNtCseuqlQlvfqSz_4core3fmt5Write9write_str 0000000140002390 f   minifilter_helper:alloc-72c9dd0c1226daaf.alloc.f67659a7e049b91d-cgu.0.rcgu.o
+ 0001:00001400       _RNvYNtNtCsl9UBPWqc0Zl_5alloc6string6StringNtNtCseuqlQlvfqSz_4core3fmt5Write9write_fmtB6_ 0000000140002400 f   minifilter_helper:alloc-72c9dd0c1226daaf.alloc.f67659a7e049b91d-cgu.0.rcgu.o
+ 0001:00001420       _RINvNtNtCseuqlQlvfqSz_4core3fmt5float29float_to_decimal_common_exactdEB6_ 0000000140002420 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:00001870       _RINvNtNtCseuqlQlvfqSz_4core3fmt5float32float_to_decimal_common_shortestdEB6_ 0000000140002870 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:00002550       _RNvMsa_NtCseuqlQlvfqSz_4core3fmtNtB5_9Formatter19pad_formatted_parts 0000000140003550 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:000027b0       _RNvMsa_NtCseuqlQlvfqSz_4core3fmtNtB5_9Formatter21write_formatted_parts 00000001400037b0 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:00006ae0       _RNvNvMsa_NtCseuqlQlvfqSz_4core3fmtNtB7_9Formatter12pad_integral12write_prefix 0000000140007ae0 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:00006b40       _RNvNvNtNtNtNtNtCseuqlQlvfqSz_4core3num3imp7flt2dec8strategy5grisu16format_exact_opt14possibly_round 0000000140007b40 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:00007080       _RNvXs1g_NtCseuqlQlvfqSz_4core3fmtRDNtB6_5DebugEL_Bx_3fmtB8_ 0000000140008080 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:000070a0       _RNvXs1g_NtCseuqlQlvfqSz_4core3fmtRyNtB6_5Debug3fmtB8_ 00000001400080a0 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:000070b0       _RNvXs1i_NtCseuqlQlvfqSz_4core3fmtReNtB6_7Display3fmtB8_ 00000001400080b0 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:00007130       _RNvXsX_NtNtCseuqlQlvfqSz_4core3fmt3numyNtB7_5Debug3fmt 0000000140008130 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:00007420       _RNvYNtNtNtCseuqlQlvfqSz_4core3fmt8builders10PadAdapterNtB6_5Write9write_fmtB8_ 0000000140008420 f   minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0001:00008b30       $$000000                   0000000140009b30     BufferOverflowFastFailK:amdsecgs.obj
+ 0001:00008b70       $$000000                   0000000140009b70     BufferOverflowFastFailK:guard_dispatch.obj
+ 0001:00008b90       $$000000                   0000000140009b90     BufferOverflowFastFailK:guard_xfg_dispatch.obj
+ 0001:00008bc0       $$000000                   0000000140009bc0     ntoskrnl:memcpy.obj
+ 0001:00008be0       mcpy00                     0000000140009be0     ntoskrnl:memcpy.obj
+ 0001:00008c00       mcpy10                     0000000140009c00     ntoskrnl:memcpy.obj
+ 0001:00008c1a       mcpy20                     0000000140009c1a     ntoskrnl:memcpy.obj
+ 0001:00008c20       mcpy30                     0000000140009c20     ntoskrnl:memcpy.obj
+ 0001:00008c40       xcpy00                     0000000140009c40     ntoskrnl:memcpy.obj
+ 0001:00008c71       xcpy10                     0000000140009c71     ntoskrnl:memcpy.obj
+ 0001:00008cc0       xcpy13                     0000000140009cc0     ntoskrnl:memcpy.obj
+ 0001:00008cef       xcpy15                     0000000140009cef     ntoskrnl:memcpy.obj
+ 0001:00008d11       xcpy20                     0000000140009d11     ntoskrnl:memcpy.obj
+ 0001:00008d25       xcpy30                     0000000140009d25     ntoskrnl:memcpy.obj
+ 0001:00008d40       lcpy00                     0000000140009d40     ntoskrnl:memcpy.obj
+ 0001:00008d80       lcpy10                     0000000140009d80     ntoskrnl:memcpy.obj
+ 0001:00008dc0       xmov00                     0000000140009dc0     ntoskrnl:memcpy.obj
+ 0001:00008ded       xmov10                     0000000140009ded     ntoskrnl:memcpy.obj
+ 0001:00008e00       xmov13                     0000000140009e00     ntoskrnl:memcpy.obj
+ 0001:00008e2f       xmov15                     0000000140009e2f     ntoskrnl:memcpy.obj
+ 0001:00008e51       xmov20                     0000000140009e51     ntoskrnl:memcpy.obj
+ 0001:00008e66       xmov30                     0000000140009e66     ntoskrnl:memcpy.obj
+ 0001:00008e80       $$000000                   0000000140009e80     ntoskrnl:memset.obj
+ 0001:00008ea2       mset10                     0000000140009ea2     ntoskrnl:memset.obj
+ 0001:00008eb8       mset20                     0000000140009eb8     ntoskrnl:memset.obj
+ 0001:00008ee1       mset30                     0000000140009ee1     ntoskrnl:memset.obj
+ 0001:00008f10       mset45                     0000000140009f10     ntoskrnl:memset.obj
+ 0001:00008f16       mset46                     0000000140009f16     ntoskrnl:memset.obj
+ 0001:00008f40       mset47                     0000000140009f40     ntoskrnl:memset.obj
+ 0001:00008f70       mset48                     0000000140009f70     ntoskrnl:memset.obj
+ 0001:00008f86       mset50                     0000000140009f86     ntoskrnl:memset.obj
+ 0001:00008fc0       $$000000                   0000000140009fc0     ntoskrnl:memset.obj
+ 0001:00008fca       repmovs10                  0000000140009fca     ntoskrnl:memset.obj
+ 0001:00008ffc       repmovs20                  0000000140009ffc     ntoskrnl:memset.obj
+ 0001:00009040       $$000000                   000000014000a040     ntoskrnl:memset.obj
+ 0001:000093c0       _RINvNvMs2_NtCsl9UBPWqc0Zl_5alloc7raw_vecINtB8_11RawVecInnerpE7reserve21do_reserve_and_handleNtNtBa_5alloc6GlobalECs5EZ1BJJQ9kk_17minifilter_helper 000000014000a3c0 f   minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0001:00009440       _RNvMs4_NtCsl9UBPWqc0Zl_5alloc7raw_vecNtB5_11RawVecInner11finish_growCs5EZ1BJJQ9kk_17minifilter_helper 000000014000a440 f   minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0001:00009500       _RINvNvMs2_NtCsl9UBPWqc0Zl_5alloc7raw_vecINtB8_11RawVecInnerpE7reserve21do_reserve_and_handleNtNtBa_5alloc6GlobalEBa_ 000000014000a500 f   minifilter_helper:alloc-72c9dd0c1226daaf.alloc.f67659a7e049b91d-cgu.0.rcgu.o
+ 0001:00009580       _RNvMs4_NtCsl9UBPWqc0Zl_5alloc7raw_vecNtB5_11RawVecInner11finish_growB7_ 000000014000a580 f   minifilter_helper:alloc-72c9dd0c1226daaf.alloc.f67659a7e049b91d-cgu.0.rcgu.o
+ 0002:00000940       anon.603792d9e1a97da3b863e0d3ee10c2c0.0 000000014000b940     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000960       anon.603792d9e1a97da3b863e0d3ee10c2c0.1 000000014000b960     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:0000098b       anon.603792d9e1a97da3b863e0d3ee10c2c0.3 000000014000b98b     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000998       anon.603792d9e1a97da3b863e0d3ee10c2c0.4 000000014000b998     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:000009b0       anon.603792d9e1a97da3b863e0d3ee10c2c0.5 000000014000b9b0     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000a50       anon.603792d9e1a97da3b863e0d3ee10c2c0.6 000000014000ba50     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000a68       anon.603792d9e1a97da3b863e0d3ee10c2c0.7 000000014000ba68     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000a80       anon.603792d9e1a97da3b863e0d3ee10c2c0.8 000000014000ba80     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000ab0       anon.603792d9e1a97da3b863e0d3ee10c2c0.9 000000014000bab0     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000ac8       anon.603792d9e1a97da3b863e0d3ee10c2c0.10 000000014000bac8     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000ae0       anon.603792d9e1a97da3b863e0d3ee10c2c0.11 000000014000bae0     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000aea       anon.603792d9e1a97da3b863e0d3ee10c2c0.12 000000014000baea     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000af7       anon.603792d9e1a97da3b863e0d3ee10c2c0.13 000000014000baf7     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000b0f       anon.603792d9e1a97da3b863e0d3ee10c2c0.14 000000014000bb0f     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000b1b       anon.603792d9e1a97da3b863e0d3ee10c2c0.15 000000014000bb1b     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000b26       anon.603792d9e1a97da3b863e0d3ee10c2c0.16 000000014000bb26     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000b32       anon.603792d9e1a97da3b863e0d3ee10c2c0.17 000000014000bb32     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000b4a       anon.603792d9e1a97da3b863e0d3ee10c2c0.18 000000014000bb4a     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000b60       anon.603792d9e1a97da3b863e0d3ee10c2c0.19 000000014000bb60     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000b6f       anon.603792d9e1a97da3b863e0d3ee10c2c0.20 000000014000bb6f     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000b7c       anon.603792d9e1a97da3b863e0d3ee10c2c0.21 000000014000bb7c     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000b90       anon.603792d9e1a97da3b863e0d3ee10c2c0.22 000000014000bb90     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000baf       anon.603792d9e1a97da3b863e0d3ee10c2c0.23 000000014000bbaf     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000bcc       anon.603792d9e1a97da3b863e0d3ee10c2c0.24 000000014000bbcc     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000be4       anon.603792d9e1a97da3b863e0d3ee10c2c0.25 000000014000bbe4     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000bfe       anon.603792d9e1a97da3b863e0d3ee10c2c0.26 000000014000bbfe     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000c13       anon.603792d9e1a97da3b863e0d3ee10c2c0.27 000000014000bc13     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000c31       anon.603792d9e1a97da3b863e0d3ee10c2c0.28 000000014000bc31     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000c40       anon.603792d9e1a97da3b863e0d3ee10c2c0.29 000000014000bc40     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000c53       anon.603792d9e1a97da3b863e0d3ee10c2c0.30 000000014000bc53     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000c61       anon.603792d9e1a97da3b863e0d3ee10c2c0.31 000000014000bc61     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000c77       anon.603792d9e1a97da3b863e0d3ee10c2c0.32 000000014000bc77     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000c8c       anon.603792d9e1a97da3b863e0d3ee10c2c0.33 000000014000bc8c     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000c9f       anon.603792d9e1a97da3b863e0d3ee10c2c0.34 000000014000bc9f     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000cab       anon.603792d9e1a97da3b863e0d3ee10c2c0.35 000000014000bcab     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000cc0       anon.603792d9e1a97da3b863e0d3ee10c2c0.36 000000014000bcc0     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000cd4       anon.603792d9e1a97da3b863e0d3ee10c2c0.37 000000014000bcd4     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000ce6       anon.603792d9e1a97da3b863e0d3ee10c2c0.38 000000014000bce6     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000cf6       anon.603792d9e1a97da3b863e0d3ee10c2c0.39 000000014000bcf6     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000d00       anon.603792d9e1a97da3b863e0d3ee10c2c0.40 000000014000bd00     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000d10       anon.603792d9e1a97da3b863e0d3ee10c2c0.41 000000014000bd10     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000d27       anon.603792d9e1a97da3b863e0d3ee10c2c0.42 000000014000bd27     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000d51       anon.603792d9e1a97da3b863e0d3ee10c2c0.43 000000014000bd51     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000d7b       anon.603792d9e1a97da3b863e0d3ee10c2c0.44 000000014000bd7b     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000d97       anon.603792d9e1a97da3b863e0d3ee10c2c0.45 000000014000bd97     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000db3       anon.603792d9e1a97da3b863e0d3ee10c2c0.46 000000014000bdb3     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000dce       anon.603792d9e1a97da3b863e0d3ee10c2c0.47 000000014000bdce     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000de9       anon.603792d9e1a97da3b863e0d3ee10c2c0.48 000000014000bde9     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000dfa       anon.603792d9e1a97da3b863e0d3ee10c2c0.49 000000014000bdfa     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000e1a       anon.603792d9e1a97da3b863e0d3ee10c2c0.50 000000014000be1a     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000e33       anon.603792d9e1a97da3b863e0d3ee10c2c0.51 000000014000be33     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000e42       anon.603792d9e1a97da3b863e0d3ee10c2c0.52 000000014000be42     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000e5a       anon.603792d9e1a97da3b863e0d3ee10c2c0.53 000000014000be5a     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000e72       anon.603792d9e1a97da3b863e0d3ee10c2c0.54 000000014000be72     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000e8b       anon.603792d9e1a97da3b863e0d3ee10c2c0.55 000000014000be8b     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000e9e       anon.603792d9e1a97da3b863e0d3ee10c2c0.56 000000014000be9e     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000eb8       anon.603792d9e1a97da3b863e0d3ee10c2c0.57 000000014000beb8     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000ed8       anon.603792d9e1a97da3b863e0d3ee10c2c0.58 000000014000bed8     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000ee6       anon.603792d9e1a97da3b863e0d3ee10c2c0.64 000000014000bee6     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000ee8       anon.603792d9e1a97da3b863e0d3ee10c2c0.65 000000014000bee8     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000f00       anon.603792d9e1a97da3b863e0d3ee10c2c0.66 000000014000bf00     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000f18       anon.603792d9e1a97da3b863e0d3ee10c2c0.67 000000014000bf18     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00000f30       switch.table._RNvXs1_NtCs5EZ1BJJQ9kk_17minifilter_helper6commonNtB5_13OperationTypeNtNtCseuqlQlvfqSz_4core3fmt5Debug3fmt 000000014000bf30     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:000010a0       switch.table._RNvXs1_NtCs5EZ1BJJQ9kk_17minifilter_helper6commonNtB5_13OperationTypeNtNtCseuqlQlvfqSz_4core3fmt5Debug3fmt.1.rel 000000014000c0a0     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00001158       switch.table.__helper_add_record.2 000000014000c158     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0002:00001188       anon.4d446aa1dec3cac91c1ff9b7efcef169.6 000000014000c188     minifilter_helper:alloc-72c9dd0c1226daaf.alloc.f67659a7e049b91d-cgu.0.rcgu.o
+ 0002:000011a8       anon.4d446aa1dec3cac91c1ff9b7efcef169.14 000000014000c1a8     minifilter_helper:alloc-72c9dd0c1226daaf.alloc.f67659a7e049b91d-cgu.0.rcgu.o
+ 0002:000011f9       anon.4d446aa1dec3cac91c1ff9b7efcef169.25 000000014000c1f9     minifilter_helper:alloc-72c9dd0c1226daaf.alloc.f67659a7e049b91d-cgu.0.rcgu.o
+ 0002:00001210       anon.4d446aa1dec3cac91c1ff9b7efcef169.26 000000014000c210     minifilter_helper:alloc-72c9dd0c1226daaf.alloc.f67659a7e049b91d-cgu.0.rcgu.o
+ 0002:00001228       anon.4d446aa1dec3cac91c1ff9b7efcef169.34 000000014000c228     minifilter_helper:alloc-72c9dd0c1226daaf.alloc.f67659a7e049b91d-cgu.0.rcgu.o
+ 0002:00001258       anon.4d446aa1dec3cac91c1ff9b7efcef169.35 000000014000c258     minifilter_helper:alloc-72c9dd0c1226daaf.alloc.f67659a7e049b91d-cgu.0.rcgu.o
+ 0002:000012ae       anon.4d446aa1dec3cac91c1ff9b7efcef169.36 000000014000c2ae     minifilter_helper:alloc-72c9dd0c1226daaf.alloc.f67659a7e049b91d-cgu.0.rcgu.o
+ 0002:000012f8       anon.4d446aa1dec3cac91c1ff9b7efcef169.37 000000014000c2f8     minifilter_helper:alloc-72c9dd0c1226daaf.alloc.f67659a7e049b91d-cgu.0.rcgu.o
+ 0002:00001310       anon.4d446aa1dec3cac91c1ff9b7efcef169.49 000000014000c310     minifilter_helper:alloc-72c9dd0c1226daaf.alloc.f67659a7e049b91d-cgu.0.rcgu.o
+ 0002:00001354       anon.002d7d46f216099dc985c682a5fd8099.1 000000014000c354     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00001368       anon.002d7d46f216099dc985c682a5fd8099.5 000000014000c368     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00001388       anon.002d7d46f216099dc985c682a5fd8099.13 000000014000c388     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:000013aa       anon.002d7d46f216099dc985c682a5fd8099.14 000000014000c3aa     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00001402       anon.002d7d46f216099dc985c682a5fd8099.15 000000014000c402     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:0000142f       anon.002d7d46f216099dc985c682a5fd8099.16 000000014000c42f     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00001430       anon.002d7d46f216099dc985c682a5fd8099.17 000000014000c430     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00001431       anon.002d7d46f216099dc985c682a5fd8099.18 000000014000c431     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00001434       anon.002d7d46f216099dc985c682a5fd8099.19 000000014000c434     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00001437       anon.002d7d46f216099dc985c682a5fd8099.20 000000014000c437     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00001438       anon.002d7d46f216099dc985c682a5fd8099.21 000000014000c438     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:0000143a       anon.002d7d46f216099dc985c682a5fd8099.32 000000014000c43a     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00001460       anon.002d7d46f216099dc985c682a5fd8099.33 000000014000c460     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00001478       anon.002d7d46f216099dc985c682a5fd8099.40 000000014000c478     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:0000147a       anon.002d7d46f216099dc985c682a5fd8099.41 000000014000c47a     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:0000147b       anon.002d7d46f216099dc985c682a5fd8099.42 000000014000c47b     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:0000147d       anon.002d7d46f216099dc985c682a5fd8099.59 000000014000c47d     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:0000147e       anon.002d7d46f216099dc985c682a5fd8099.60 000000014000c47e     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:0000147f       anon.002d7d46f216099dc985c682a5fd8099.87 000000014000c47f     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:000014d8       anon.002d7d46f216099dc985c682a5fd8099.89 000000014000c4d8     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:000014f0       anon.002d7d46f216099dc985c682a5fd8099.90 000000014000c4f0     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00001543       anon.002d7d46f216099dc985c682a5fd8099.92 000000014000c543     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:0000155e       anon.002d7d46f216099dc985c682a5fd8099.93 000000014000c55e     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00001578       anon.002d7d46f216099dc985c682a5fd8099.98 000000014000c578     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00001590       anon.002d7d46f216099dc985c682a5fd8099.99 000000014000c590     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:000015b0       anon.002d7d46f216099dc985c682a5fd8099.102 000000014000c5b0     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:000015e0       anon.002d7d46f216099dc985c682a5fd8099.108 000000014000c5e0     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00001620       anon.002d7d46f216099dc985c682a5fd8099.130 000000014000c620     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:0000164b       anon.002d7d46f216099dc985c682a5fd8099.131 000000014000c64b     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00001651       anon.002d7d46f216099dc985c682a5fd8099.136 000000014000c651     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00001688       anon.002d7d46f216099dc985c682a5fd8099.137 000000014000c688     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:0000168a       anon.002d7d46f216099dc985c682a5fd8099.138 000000014000c68a     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:0000168c       anon.002d7d46f216099dc985c682a5fd8099.139 000000014000c68c     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00001693       anon.002d7d46f216099dc985c682a5fd8099.140 000000014000c693     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:000016ca       anon.002d7d46f216099dc985c682a5fd8099.141 000000014000c6ca     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00001705       anon.002d7d46f216099dc985c682a5fd8099.147 000000014000c705     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:000017cd       anon.002d7d46f216099dc985c682a5fd8099.149 000000014000c7cd     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:000017ce       anon.002d7d46f216099dc985c682a5fd8099.156 000000014000c7ce     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00001805       anon.002d7d46f216099dc985c682a5fd8099.157 000000014000c805     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:0000182d       anon.002d7d46f216099dc985c682a5fd8099.158 000000014000c82d     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00001866       anon.002d7d46f216099dc985c682a5fd8099.171 000000014000c866     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:0000187f       anon.002d7d46f216099dc985c682a5fd8099.194 000000014000c87f     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:000018a0       anon.002d7d46f216099dc985c682a5fd8099.195 000000014000c8a0     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:000018b8       anon.002d7d46f216099dc985c682a5fd8099.196 000000014000c8b8     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:000018d8       anon.002d7d46f216099dc985c682a5fd8099.197 000000014000c8d8     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:000018f0       anon.002d7d46f216099dc985c682a5fd8099.198 000000014000c8f0     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00001e18       anon.002d7d46f216099dc985c682a5fd8099.223 000000014000ce18     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00001e34       anon.002d7d46f216099dc985c682a5fd8099.224 000000014000ce34     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00001e98       anon.002d7d46f216099dc985c682a5fd8099.225 000000014000ce98     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00001eb0       anon.002d7d46f216099dc985c682a5fd8099.226 000000014000ceb0     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00001ed8       anon.002d7d46f216099dc985c682a5fd8099.227 000000014000ced8     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00001ef0       anon.002d7d46f216099dc985c682a5fd8099.228 000000014000cef0     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00001f08       anon.002d7d46f216099dc985c682a5fd8099.229 000000014000cf08     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00001f20       anon.002d7d46f216099dc985c682a5fd8099.231 000000014000cf20     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00001f38       anon.002d7d46f216099dc985c682a5fd8099.232 000000014000cf38     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00001f50       anon.002d7d46f216099dc985c682a5fd8099.233 000000014000cf50     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00001f68       anon.002d7d46f216099dc985c682a5fd8099.234 000000014000cf68     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00001f80       anon.002d7d46f216099dc985c682a5fd8099.235 000000014000cf80     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00001fa0       anon.002d7d46f216099dc985c682a5fd8099.236 000000014000cfa0     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00001fb8       anon.002d7d46f216099dc985c682a5fd8099.237 000000014000cfb8     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00001fd8       anon.002d7d46f216099dc985c682a5fd8099.238 000000014000cfd8     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00001ff0       anon.002d7d46f216099dc985c682a5fd8099.239 000000014000cff0     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00002008       anon.002d7d46f216099dc985c682a5fd8099.240 000000014000d008     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00002038       anon.002d7d46f216099dc985c682a5fd8099.241 000000014000d038     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00002050       anon.002d7d46f216099dc985c682a5fd8099.242 000000014000d050     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00002068       anon.002d7d46f216099dc985c682a5fd8099.243 000000014000d068     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00002080       anon.002d7d46f216099dc985c682a5fd8099.244 000000014000d080     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00002098       anon.002d7d46f216099dc985c682a5fd8099.245 000000014000d098     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:000020d0       anon.002d7d46f216099dc985c682a5fd8099.246 000000014000d0d0     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:000020e8       anon.002d7d46f216099dc985c682a5fd8099.247 000000014000d0e8     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00002120       anon.002d7d46f216099dc985c682a5fd8099.248 000000014000d120     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00002138       anon.002d7d46f216099dc985c682a5fd8099.249 000000014000d138     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:000021a0       anon.002d7d46f216099dc985c682a5fd8099.250 000000014000d1a0     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:000021b8       anon.002d7d46f216099dc985c682a5fd8099.251 000000014000d1b8     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:000021d0       anon.002d7d46f216099dc985c682a5fd8099.252 000000014000d1d0     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:000021e8       anon.002d7d46f216099dc985c682a5fd8099.253 000000014000d1e8     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00002200       anon.002d7d46f216099dc985c682a5fd8099.254 000000014000d200     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00002218       anon.002d7d46f216099dc985c682a5fd8099.255 000000014000d218     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00002230       anon.002d7d46f216099dc985c682a5fd8099.256 000000014000d230     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00002248       anon.002d7d46f216099dc985c682a5fd8099.257 000000014000d248     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00002260       anon.002d7d46f216099dc985c682a5fd8099.258 000000014000d260     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00002278       anon.002d7d46f216099dc985c682a5fd8099.259 000000014000d278     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00002290       anon.002d7d46f216099dc985c682a5fd8099.260 000000014000d290     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:000022a8       anon.002d7d46f216099dc985c682a5fd8099.261 000000014000d2a8     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:000022c0       anon.002d7d46f216099dc985c682a5fd8099.262 000000014000d2c0     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:000022d8       anon.002d7d46f216099dc985c682a5fd8099.263 000000014000d2d8     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:000022f0       anon.002d7d46f216099dc985c682a5fd8099.264 000000014000d2f0     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00002308       anon.002d7d46f216099dc985c682a5fd8099.265 000000014000d308     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00002320       anon.002d7d46f216099dc985c682a5fd8099.266 000000014000d320     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00002338       anon.002d7d46f216099dc985c682a5fd8099.267 000000014000d338     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00002350       anon.002d7d46f216099dc985c682a5fd8099.268 000000014000d350     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00002368       _RNvNtNtNtNtNtCseuqlQlvfqSz_4core3num3imp7flt2dec8strategy6dragon5POW10 000000014000d368     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00002390       _RNvNtNtNtNtNtCseuqlQlvfqSz_4core3num3imp7flt2dec8strategy6dragon8POW5TO16 000000014000d390     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00002398       _RNvNtNtNtNtNtCseuqlQlvfqSz_4core3num3imp7flt2dec8strategy6dragon8POW5TO32 000000014000d398     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:000023a4       _RNvNtNtNtNtNtCseuqlQlvfqSz_4core3num3imp7flt2dec8strategy6dragon8POW5TO64 000000014000d3a4     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:000023b8       _RNvNtNtNtNtNtCseuqlQlvfqSz_4core3num3imp7flt2dec8strategy6dragon9POW5TO128 000000014000d3b8     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:000023e0       _RNvNtNtNtNtNtCseuqlQlvfqSz_4core3num3imp7flt2dec8strategy6dragon9POW5TO256 000000014000d3e0     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00002430       anon.002d7d46f216099dc985c682a5fd8099.270 000000014000d430     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00002448       anon.002d7d46f216099dc985c682a5fd8099.271 000000014000d448     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00002460       anon.002d7d46f216099dc985c682a5fd8099.272 000000014000d460     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00002478       anon.002d7d46f216099dc985c682a5fd8099.291 000000014000d478     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:0000247c       anon.002d7d46f216099dc985c682a5fd8099.340 000000014000d47c     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:0000247e       anon.002d7d46f216099dc985c682a5fd8099.352 000000014000d47e     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:00002490       switch.table._RNvNtCseuqlQlvfqSz_4core9panicking19assert_failed_inner.rel 000000014000d490     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:000024a0       switch.table._RNvNtCseuqlQlvfqSz_4core9panicking19assert_failed_inner.244 000000014000d4a0     minifilter_helper:core-2f0a58b9b8fd2e98.core.a8c84ed9347b53f9-cgu.0.rcgu.o
+ 0002:000029f0       $unwind$IRPCollectionInstanceQueryTeardown 000000014000d9f0     IRPCollection.obj
+ 0002:000029f0       $unwind$IRPCollectionInstanceTeardownComplete 000000014000d9f0     IRPCollection.obj
+ 0002:000029f0       $unwind$IRPCollectionInstanceTeardownStart 000000014000d9f0     IRPCollection.obj
+ 0002:000029f0       $unwind$MmGetSystemAddressForMdlSafe 000000014000d9f0     IRPCollection.obj
+ 0002:000029fc       $unwind$GetFileName        000000014000d9fc     IRPCollection.obj
+ 0002:00002a0c       $unwind$WriteToLog         000000014000da0c     IRPCollection.obj
+ 0002:00002a18       $unwind$GetProcessImageName 000000014000da18     IRPCollection.obj
+ 0002:00002a30       $unwind$GetProcessBasicInfo 000000014000da30     IRPCollection.obj
+ 0002:00002a3c       $unwind$ProcessIRP         000000014000da3c     IRPCollection.obj
+ 0002:00002a54       $unwind$CalculateEntropyBasedOnBit 000000014000da54     IRPCollection.obj
+ 0002:00002a60       $unwind$CalculateEntropyBasedOnByte 000000014000da60     IRPCollection.obj
+ 0002:00002a78       $unwind$IRPCollectionDoRequestOperationStatus 000000014000da78     IRPCollection.obj
+ 0002:00002a78       $unwind$isTheIrpDeleteFile 000000014000da78     IRPCollection.obj
+ 0002:00002a78       $unwind$isTheIrpRenameFile 000000014000da78     IRPCollection.obj
+ 0002:00002a84       $unwind$InitializeZwQueryInformationProcess 000000014000da84     IRPCollection.obj
+ 0002:00002a84       $unwind$getCurrentTime     000000014000da84     IRPCollection.obj
+ 0002:00002a90       $unwind$DriverEntry        000000014000da90     IRPCollection.obj
+ 0002:00002a9c       $unwind$IRPCollectionInstanceSetup 000000014000da9c     IRPCollection.obj
+ 0002:00002aa8       $unwind$IRPCollectionUnload 000000014000daa8     IRPCollection.obj
+ 0002:00002ab4       $unwind$IRPCollectionPreOperation 000000014000dab4     IRPCollection.obj
+ 0002:00002ab4       $unwind$IRPCollectionPreOperationNoPostOperation 000000014000dab4     IRPCollection.obj
+ 0002:00002ac0       $unwind$IRPCollectionOperationStatusCallback 000000014000dac0     IRPCollection.obj
+ 0002:00002acc       $unwind$IRPCollectionPostOperation 000000014000dacc     IRPCollection.obj
+ 0002:00002b94       $cppxdata$_RNvMNtCsl9UBPWqc0Zl_5alloc6stringNtB2_6String10from_utf16 000000014000db94     minifilter_helper:alloc-72c9dd0c1226daaf.alloc.f67659a7e049b91d-cgu.0.rcgu.o
+ 0002:00002bbc       $stateUnwindMap$_RNvMNtCsl9UBPWqc0Zl_5alloc6stringNtB2_6String10from_utf16 000000014000dbbc     minifilter_helper:alloc-72c9dd0c1226daaf.alloc.f67659a7e049b91d-cgu.0.rcgu.o
+ 0002:00002bc4       $ip2state$_RNvMNtCsl9UBPWqc0Zl_5alloc6stringNtB2_6String10from_utf16 000000014000dbc4     minifilter_helper:alloc-72c9dd0c1226daaf.alloc.f67659a7e049b91d-cgu.0.rcgu.o
+ 0002:00002c28       $cppxdata$_RNvNvNtCsl9UBPWqc0Zl_5alloc3fmt6format12format_inner 000000014000dc28     minifilter_helper:alloc-72c9dd0c1226daaf.alloc.f67659a7e049b91d-cgu.0.rcgu.o
+ 0002:00002c50       $stateUnwindMap$_RNvNvNtCsl9UBPWqc0Zl_5alloc3fmt6format12format_inner 000000014000dc50     minifilter_helper:alloc-72c9dd0c1226daaf.alloc.f67659a7e049b91d-cgu.0.rcgu.o
+ 0002:00002c58       $ip2state$_RNvNvNtCsl9UBPWqc0Zl_5alloc3fmt6format12format_inner 000000014000dc58     minifilter_helper:alloc-72c9dd0c1226daaf.alloc.f67659a7e049b91d-cgu.0.rcgu.o
+ 0002:00002e30       $unwind$GsDriverEntry      000000014000de30     BufferOverflowFastFailK:gs_driverentry.obj
+ 0002:00002e40       $xdatasym                  000000014000de40     BufferOverflowFastFailK:amdsecgs.obj
+ 0002:00002e48       $xdatasym$_guard_dispatch_icall_nop 000000014000de48     BufferOverflowFastFailK:guard_dispatch.obj
+ 0002:00002e48       $xdatasym$_guard_xfg_dispatch_icall_nop 000000014000de48     BufferOverflowFastFailK:guard_xfg_dispatch.obj
+ 0002:00002e48       $xdatasym$memcpy           000000014000de48     ntoskrnl:memcpy.obj
+ 0002:00002e48       $xdatasym$memset           000000014000de48     ntoskrnl:memset.obj
+ 0002:00002e50       $unwind$__GSHandlerCheck   000000014000de50     ntoskrnl:gshandler.obj
+ 0002:00002e50       $unwind$__GSHandlerCheckCommon 000000014000de50     ntoskrnl:gshandler.obj
+ 0002:00002e60       $xdatasym$__memset_repmovs 000000014000de60     ntoskrnl:memset.obj
+ 0002:00002e70       $xdatasym$__memset_query   000000014000de70     ntoskrnl:memset.obj
+ 0002:00002e88       $unwind$__cpu_features_init 000000014000de88     ntoskrnl:cpuinfo.obj
+ 0003:00000888       _RNvCs5EZ1BJJQ9kk_17minifilter_helper19STRINGIFY_FLUSH_STR.0 000000014000e888     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0003:00000890       _RNvCs5EZ1BJJQ9kk_17minifilter_helper19WRITE_LOG_FILE_LOCK.0 000000014000e890     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0003:00000898       _RNvCs5EZ1BJJQ9kk_17minifilter_helper7RECORDS.0 000000014000e898     minifilter_helper:minifilter_helper-50e8df6ec63647cb.minifilter_helper.41f0067423a0c962-cgu.0.rcgu.o
+ 0006:0000038a       .idata$6                   000000014001138a     ntoskrnl:ntoskrnl.exe
+ 0006:00000452       .idata$6                   0000000140011452     fltMgr:FLTMGR.SYS
+ 0007:000000b0       $R000000                   00000001400120b0     minispy.res
+ 0007:000000e8       $R000038                   00000001400120e8     minispy.res

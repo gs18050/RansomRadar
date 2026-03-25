@@ -143,7 +143,6 @@
     <ResourceCompile Include="minispy.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Inf Exclude="@(Inf)" Include="*.inf" />
     <FilesToPackage Include="$(TargetPath)" Condition="'$(ConfigurationType)'=='Driver' or '$(ConfigurationType)'=='DynamicLibrary'" />
     <Inf Include="..\minispy.inf" />
   </ItemGroup>
@@ -155,5 +154,8 @@
   <ItemGroup>
     <ClInclude Exclude="@(ClInclude)" Include="*.h;*.hpp;*.hxx;*.hm;*.inl;*.xsd" />
   </ItemGroup>
+  <Target Name="CleanStaleDriverPackageArtifacts" BeforeTargets="PrepareForBuild">
+    <Delete Files="$(IntDir)minispy\minispy.cat;$(IntDir)minispy\minispy.inf" ContinueOnError="true" />
+  </Target>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

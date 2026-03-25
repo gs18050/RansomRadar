@@ -5,7 +5,6 @@ ClassGuid={b86dff51-a31e-4bac-b3cf-e8cfe75c9fc2}
 Provider=%ManufacturerName%
 DriverVer=03/25/2026,1.0.0.0
 CatalogFile=IRPCollection.cat
-PnpLockdown=1
 
 [DestinationDirs]
 DefaultDestDir=12
@@ -19,8 +18,7 @@ CopyFiles=IRPCollection.DriverFiles
 AddService=%ServiceName%,,IRPCollection.Service
 
 [DefaultUninstall.NTamd64]
-LegacyUninstall=1
-DelFiles=IRPCollection.DriverFiles.Del
+DelFiles=IRPCollection.DriverFiles
 
 [DefaultUninstall.NTamd64.Services]
 DelService=%ServiceName%,0x200
@@ -43,9 +41,6 @@ HKR,"Instances\"%Instance1.Name%,"Altitude",0x00000000,%Instance1.Altitude%
 HKR,"Instances\"%Instance1.Name%,"Flags",0x00010001,%Instance1.Flags%
 
 [IRPCollection.DriverFiles]
-IRPCollection.sys
-
-[IRPCollection.DriverFiles.Del]
 IRPCollection.sys
 
 [SourceDisksFiles]

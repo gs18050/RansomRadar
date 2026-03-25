@@ -4,11 +4,17 @@ Class=ActivityMonitor
 ClassGuid={b86dff51-a31e-4bac-b3cf-e8cfe75c9fc2}
 Provider=%ManufacturerName%
 DriverVer=03/25/2026,1.0.0.0
-CatalogFile=IRPCollection.cat
 
 [DestinationDirs]
 DefaultDestDir=12
 IRPCollection.DriverFiles=12
+
+[DefaultInstall]
+OptionDesc=%ServiceDescription%
+CopyFiles=IRPCollection.DriverFiles
+
+[DefaultInstall.Services]
+AddService=%ServiceName%,,IRPCollection.Service
 
 [DefaultInstall.NTamd64]
 OptionDesc=%ServiceDescription%
@@ -16,6 +22,12 @@ CopyFiles=IRPCollection.DriverFiles
 
 [DefaultInstall.NTamd64.Services]
 AddService=%ServiceName%,,IRPCollection.Service
+n
+[DefaultUninstall]
+DelFiles=IRPCollection.DriverFiles
+
+[DefaultUninstall.Services]
+DelService=%ServiceName%,0x200
 
 [DefaultUninstall.NTamd64]
 DelFiles=IRPCollection.DriverFiles

@@ -38,7 +38,7 @@
   <PropertyGroup>
     <WindowsTargetPlatformVersion Condition="'$(WindowsTargetPlatformVersion)'=='' and '$(LatestTargetPlatformVersion)'!=''">$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
     <WindowsTargetPlatformVersion Condition="'$(WindowsTargetPlatformVersion)'==''">10.0.19041.0</WindowsTargetPlatformVersion>
-    <KernelIncludeFallback>$(KM_IncludePath);$(WindowsSDK_IncludePath);$(UniversalCRT_IncludePath);$(WindowsSdkDir)Include\$(WindowsTargetPlatformVersion)\km;$(WindowsSdkDir)Include\$(WindowsTargetPlatformVersion)\shared;$(WindowsSdkDir)Include\$(WindowsTargetPlatformVersion)\ucrt;$(WindowsSdkDir)Include\$(WindowsTargetPlatformVersion)\um</KernelIncludeFallback>
+    <KernelIncludeFallback>$(KM_IncludePath);$(WindowsSdkDir)Include\$(WindowsTargetPlatformVersion)\km;$(WindowsSdkDir)Include\$(WindowsTargetPlatformVersion)\shared</KernelIncludeFallback>
     <OutDir>$(IntDir)</OutDir>
   </PropertyGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

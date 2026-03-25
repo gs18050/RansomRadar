@@ -3,9 +3,7 @@
 
 #include <fltKernel.h>
 #include <dontuse.h>
-#include <wdm.h>
-#include <ntstrsafe.h>
-#include <ntddk.h>
+#include <suppress.h>
 
 #define __HELPER_MAX_STRING_LENGTH 512
 #define __HELPER_IRP_NOTHING 255

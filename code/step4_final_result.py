@@ -1,4 +1,5 @@
 import os
+import argparse
 import pandas as pd
 from config import (
     RESULT_PATH,
@@ -80,7 +81,23 @@ def format_rate(detected, total):
     return round(detected / total * 100, 2)
 
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '--print-ransomware-caught',
+        action='store_true',
+        help='Print ransomware samples that were caught in step4 evaluation.',
+    )
+    parser.add_argument(
+        '--print-ransomware-not-caught',
+        action='store_true',
+        help='Print ransomware samples that were not caught in step4 evaluation.',
+    )
+    return parser.parse_args()
+
+
 def main():
+    args = parse_args()
     background_process_union, valid_baseline_runs = build_background_process_union()
     print(f'background baseline runs loaded: {valid_baseline_runs}')
     print(f'background process union size: {len(background_process_union)}')
@@ -122,6 +139,25 @@ def main():
             print(f'benign, included background FP groups: {included_background_fp}')
         elif label == 'ransomware':
             print(f'ransomware: recall: {format_rate(cnt_detected, total)}% ({cnt_detected}/{total})')
+            if args.print_ransomware_caught or args.print_ransomware_not_caught:
+                caught_df = grouped_df[grouped_df['detected']].sort_values(['Sample', 'Process'])
+                not_caught_df = grouped_df[~grouped_df['detected']].sort_values(['Sample', 'Process'])
+
+                if args.print_ransomware_caught:
+                    print('ransomware caught:')
+                    if caught_df.empty:
+                        print('  (none)')
+                    else:
+                        for _, row in caught_df.iterrows():
+                            print(f"  {row['Sample']} | {row['Process']}")
+
+                if args.print_ransomware_not_caught:
+                    print('ransomware not caught:')
+                    if not_caught_df.empty:
+                        print('  (none)')
+                    else:
+                        for _, row in not_caught_df.iterrows():
+                            print(f"  {row['Sample']} | {row['Process']}")
 
 
 if __name__ == '__main__':

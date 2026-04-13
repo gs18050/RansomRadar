@@ -20,11 +20,11 @@ def infer_type(v: str) -> str:
     if s == "":
         return "empty"
     if INT_RE.match(s):
-        return "int"
+        return "number"
     try:
         x = float(s)
         if math.isfinite(x):
-            return "float"
+            return "number"
         return "str"
     except ValueError:
         return "str"

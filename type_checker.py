@@ -5,7 +5,14 @@ import math
 import re
 from collections import Counter, defaultdict
 
-csv.field_size_limit(sys.maxsize)
+max_int = sys.maxsize
+while True:
+    try:
+        csv.field_size_limit(max_int)
+        break
+    except OverflowError:
+        max_int //= 10
+
 INT_RE = re.compile(r"^[+-]?\d+$")
 
 def infer_type(v: str) -> str:

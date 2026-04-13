@@ -1,9 +1,11 @@
+import sys
 import argparse
 import csv
 import math
 import re
 from collections import Counter, defaultdict
 
+csv.field_size_limit(sys.maxsize)
 INT_RE = re.compile(r"^[+-]?\d+$")
 
 def infer_type(v: str) -> str:

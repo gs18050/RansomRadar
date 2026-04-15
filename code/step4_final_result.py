@@ -22,7 +22,20 @@ def load_result_pair(encryption_path, tc_path):
 
     tc_df = pd.read_csv(tc_path)
     tc_df = tc_df.rename(columns={'sample': 'Sample', 'process': 'Process', 'predict': 'tc_predict'})
-    tc_df = tc_df[['Sample', 'Process', 'Second', 'tc_predict']]
+    branchinstructions_cols = [c for c in tc_df.columns if c.startswith('branchinstructions_')]
+    branchmispredicts_cols = [c for c in tc_df.columns if c.startswith('branchmispredicts_')]
+
+    if branchinstructions_cols:
+        tc_df['branchinstructions_sum'] = tc_df[branchinstructions_cols].sum(axis=1)
+    else:
+        tc_df['branchinstructions_sum'] = 0.0
+
+    if branchmispredicts_cols:
+        tc_df['branchmispredicts_sum'] = tc_df[branchmispredicts_cols].sum(axis=1)
+    else:
+        tc_df['branchmispredicts_sum'] = 0.0
+
+    tc_df = tc_df[['Sample', 'Process', 'Second', 'tc_predict', 'branchinstructions_sum', 'branchmispredicts_sum']]
     tc_df['tc_predict'] = tc_df['tc_predict'].astype(bool)
 
     df = pd.merge(encryption_df, tc_df, on=['Sample', 'Process', 'Second'], how='inner')
@@ -75,6 +88,12 @@ def summarize_group_level_detection(df):
     )
 
 
+def safe_mean(series):
+    if len(series) == 0:
+        return 0.0
+    return float(series.mean())
+
+
 def format_rate(detected, total):
     if total == 0:
         return 0.0
@@ -117,6 +136,11 @@ def main():
 
         if label == 'benign':
             print(f'benign, original false positive rate: {format_rate(cnt_detected, total)}% ({cnt_detected}/{total})')
+            print(
+                'benign, avg counters (all processes): '
+                f"branchinstructions={safe_mean(df['branchinstructions_sum']):.2f}, "
+                f"branchmispredicts={safe_mean(df['branchmispredicts_sum']):.2f}"
+            )
 
             grouped_df['is_background'] = grouped_df['Process'].apply(
                 lambda p: normalize_process_name(p) in background_process_union
@@ -139,6 +163,24 @@ def main():
             print(f'benign, included background FP groups: {included_background_fp}')
         elif label == 'ransomware':
             print(f'ransomware: recall: {format_rate(cnt_detected, total)}% ({cnt_detected}/{total})')
+            print(
+                'ransomware, avg counters (mapped ransomware process): '
+                f"branchinstructions={safe_mean(df['branchinstructions_sum']):.2f}, "
+                f"branchmispredicts={safe_mean(df['branchmispredicts_sum']):.2f}"
+            )
+
+            predicted_ransomware_df = df[df['result']]
+            predicted_benign_df = df[~df['result']]
+            print(
+                'ransomware, avg counters (predicted ransomware): '
+                f"branchinstructions={safe_mean(predicted_ransomware_df['branchinstructions_sum']):.2f}, "
+                f"branchmispredicts={safe_mean(predicted_ransomware_df['branchmispredicts_sum']):.2f}"
+            )
+            print(
+                'ransomware, avg counters (predicted benign): '
+                f"branchinstructions={safe_mean(predicted_benign_df['branchinstructions_sum']):.2f}, "
+                f"branchmispredicts={safe_mean(predicted_benign_df['branchmispredicts_sum']):.2f}"
+            )
             if args.print_ransomware_caught or args.print_ransomware_not_caught:
                 caught_df = grouped_df[grouped_df['detected']].sort_values(['Sample', 'Process'])
                 not_caught_df = grouped_df[~grouped_df['detected']].sort_values(['Sample', 'Process'])

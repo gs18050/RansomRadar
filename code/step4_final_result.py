@@ -141,6 +141,18 @@ def main():
                 f"branchinstructions={safe_mean(df['branchinstructions_sum']):.2f}, "
                 f"branchmispredicts={safe_mean(df['branchmispredicts_sum']):.2f}"
             )
+            benign_fp_df = df[df['result']]
+            benign_non_fp_df = df[~df['result']]
+            print(
+                'benign, avg counters (FP): '
+                f"branchinstructions={safe_mean(benign_fp_df['branchinstructions_sum']):.2f}, "
+                f"branchmispredicts={safe_mean(benign_fp_df['branchmispredicts_sum']):.2f}"
+            )
+            print(
+                'benign, avg counters (non-FP): '
+                f"branchinstructions={safe_mean(benign_non_fp_df['branchinstructions_sum']):.2f}, "
+                f"branchmispredicts={safe_mean(benign_non_fp_df['branchmispredicts_sum']):.2f}"
+            )
 
             grouped_df['is_background'] = grouped_df['Process'].apply(
                 lambda p: normalize_process_name(p) in background_process_union

@@ -73,6 +73,7 @@ class LSTMModel(nn.Module):
 
 
 def print_score_stats(label, feature_df):
+    print(f'=== {label} score statistics ===')
     for score_col in ['score_for_0', 'score_for_1']:
         series = feature_df[score_col]
         print(
@@ -80,6 +81,7 @@ def print_score_stats(label, feature_df):
             f"avg={series.mean():.6f}, min={series.min():.6f}, "
             f"max={series.max():.6f}, std={series.std(ddof=0):.6f}"
         )
+    print('')
 
 
 def main():
@@ -88,6 +90,8 @@ def main():
     clf = LSTMModel(input_size=11, hidden_size=50, num_layers=1, num_classes=2)
     clf.load_state_dict(torch.load(f'{MODEL_PATH}\\tc_detection_clf.pth'))
     clf.eval()
+
+    all_result_dfs = []
 
     for label in ['benign', 'ransomware']:
         feature_df = merge_dfs(f'{FEATURE_PATH}\\lstm\\{label}')
@@ -108,12 +112,36 @@ def main():
         feature_df['score_for_0'] = logits[:, 0].cpu().numpy()
         feature_df['score_for_1'] = logits[:, 1].cpu().numpy()
         feature_df['predict'] = pred
+        feature_df['label'] = 0 if label == 'benign' else 1
 
         feature_df['Second'] = feature_df['starttime'].apply(lambda x: x // 10000000)
 
         print_score_stats(label, feature_df)
 
         feature_df.to_csv(f'{RESULT_PATH}\\tc_detection_result_{label}.csv')
+        all_result_dfs.append(feature_df[['label', 'predict', 'score_for_0', 'score_for_1']].copy())
+
+    combined_df = pd.concat(all_result_dfs, ignore_index=True)
+    bucket_df_map = {
+        'true positive (TP)': combined_df[(combined_df['label'] == 1) & (combined_df['predict'] == 1)],
+        'false positive (FP)': combined_df[(combined_df['label'] == 0) & (combined_df['predict'] == 1)],
+        'true negative (TN)': combined_df[(combined_df['label'] == 0) & (combined_df['predict'] == 0)],
+        'false negative (FN)': combined_df[(combined_df['label'] == 1) & (combined_df['predict'] == 0)],
+    }
+
+    print('=== confusion-bucket score statistics ===')
+    for bucket_name, bucket_df in bucket_df_map.items():
+        print(f'[{bucket_name}] count={len(bucket_df)}')
+        if len(bucket_df) == 0:
+            print('  score_for_0: avg=0.000000, min=0.000000, max=0.000000, std=0.000000')
+            print('  score_for_1: avg=0.000000, min=0.000000, max=0.000000, std=0.000000')
+            continue
+        for score_col in ['score_for_0', 'score_for_1']:
+            series = bucket_df[score_col]
+            print(
+                f"  {score_col}: avg={series.mean():.6f}, min={series.min():.6f}, "
+                f"max={series.max():.6f}, std={series.std(ddof=0):.6f}"
+            )
 
 
 if __name__ == '__main__':

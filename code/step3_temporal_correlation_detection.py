@@ -72,11 +72,22 @@ class LSTMModel(nn.Module):
         return out
 
 
+def print_score_stats(label, feature_df):
+    for score_col in ['score_for_0', 'score_for_1']:
+        series = feature_df[score_col]
+        print(
+            f'{label}, {score_col}: '
+            f"avg={series.mean():.6f}, min={series.min():.6f}, "
+            f"max={series.max():.6f}, std={series.std(ddof=0):.6f}"
+        )
+
+
 def main():
     scaler = load(f'{MODEL_PATH}\\tc_detection_scaler.joblib')
 
     clf = LSTMModel(input_size=11, hidden_size=50, num_layers=1, num_classes=2)
     clf.load_state_dict(torch.load(f'{MODEL_PATH}\\tc_detection_clf.pth'))
+    clf.eval()
 
     for label in ['benign', 'ransomware']:
         feature_df = merge_dfs(f'{FEATURE_PATH}\\lstm\\{label}')
@@ -89,11 +100,18 @@ def main():
         # transform to tensor
         X = torch.tensor(X, dtype=torch.float32)
 
-        _, pred = torch.max(clf(X), 1)
+        with torch.no_grad():
+            logits = clf(X)
+
+        _, pred = torch.max(logits, 1)
         pred = pred.view(-1).tolist()
+        feature_df['score_for_0'] = logits[:, 0].cpu().numpy()
+        feature_df['score_for_1'] = logits[:, 1].cpu().numpy()
         feature_df['predict'] = pred
 
         feature_df['Second'] = feature_df['starttime'].apply(lambda x: x // 10000000)
+
+        print_score_stats(label, feature_df)
 
         feature_df.to_csv(f'{RESULT_PATH}\\tc_detection_result_{label}.csv')
 

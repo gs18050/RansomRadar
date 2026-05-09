@@ -20,6 +20,8 @@ and trains:
 ## Notes
 
 - The fold group is the paired CSV path, so rows from the same time-series file never cross folds.
+- Labels are process-specific: benign files are all `0`; ransomware files are `1` only for
+  rows where the process matches `code/sample_process.py`, and other processes are `0`.
 - LSTM early model selection uses a validation split carved only from each training fold;
   the held-out fold is not used for training decisions.
 - Final metrics group by `(Sample, Process)`. Ransomware rows use `code/sample_process.py`

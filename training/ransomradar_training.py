@@ -175,25 +175,40 @@ def validation_split(
     return [records[i] for i in train_idx], [records[i] for i in val_idx]
 
 
-def load_knn_frame(records: Sequence[SampleRecord]) -> pd.DataFrame:
+def assign_process_labels(
+    df: pd.DataFrame,
+    record: SampleRecord,
+    sample_process: Dict[str, str],
+    sample_col: str,
+    process_col: str,
+) -> pd.Series:
+    if record.label_name == "benign":
+        return pd.Series(np.zeros(len(df), dtype=np.int64), index=df.index)
+    return (
+        df.apply(lambda row: row[process_col] == sample_process.get(row[sample_col], ""), axis=1)
+        .astype(np.int64)
+    )
+
+
+def load_knn_frame(records: Sequence[SampleRecord], sample_process: Dict[str, str]) -> pd.DataFrame:
     frames = []
     for record in records:
         df = read_feature_csv(record.one_s_path, KNN_FEATURES + ["Sample", "Process", "Second"])
         df = df.copy()
-        df["label"] = record.label
+        df["label"] = assign_process_labels(df, record, sample_process, "Sample", "Process")
         df["label_name"] = record.label_name
         df["source_path"] = record.rel_path
         frames.append(df)
     return pd.concat(frames, ignore_index=True)
 
 
-def load_lstm_frame(records: Sequence[SampleRecord]) -> pd.DataFrame:
+def load_lstm_frame(records: Sequence[SampleRecord], sample_process: Dict[str, str]) -> pd.DataFrame:
     frames = []
     required = LSTM_FEATURES + ["sample", "process", "starttime"]
     for record in records:
         df = read_feature_csv(record.lstm_path, required)
         df = df.copy()
-        df["label"] = record.label
+        df["label"] = assign_process_labels(df, record, sample_process, "sample", "process")
         df["label_name"] = record.label_name
         df["source_path"] = record.rel_path
         df["Second"] = pd.to_numeric(df["starttime"], errors="coerce").fillna(0).astype(np.int64) // 10000000
@@ -374,8 +389,8 @@ def final_step4_predictions(
     )
     merged["final_predict"] = (merged["enc_predict"].astype(bool) & merged["tc_predict"].astype(bool)).astype(int)
 
-    benign = merged[merged["label"] == 0].copy()
-    ransomware = merged[merged["label"] == 1].copy()
+    benign = merged[merged["label_name"] == "benign"].copy()
+    ransomware = merged[merged["label_name"] == "ransomware"].copy()
     mapped = ransomware["Sample"].isin(sample_process)
     mapped_ransomware = ransomware[mapped].copy()
     mapped_ransomware = mapped_ransomware[
@@ -516,11 +531,11 @@ def main() -> int:
         save_records(fold_dir / "lstm_validation_samples.csv", lstm_val_records)
         save_records(fold_dir / "test_samples.csv", test_records)
 
-        knn_train_df = load_knn_frame(train_records)
-        knn_test_df = load_knn_frame(test_records)
-        lstm_train_df = load_lstm_frame(lstm_fit_records)
-        lstm_val_df = load_lstm_frame(lstm_val_records)
-        lstm_test_df = load_lstm_frame(test_records)
+        knn_train_df = load_knn_frame(train_records, sample_process)
+        knn_test_df = load_knn_frame(test_records, sample_process)
+        lstm_train_df = load_lstm_frame(lstm_fit_records, sample_process)
+        lstm_val_df = load_lstm_frame(lstm_val_records, sample_process)
+        lstm_test_df = load_lstm_frame(test_records, sample_process)
 
         knn_clf, knn_scaler = train_knn(knn_train_df, use_smote=not args.no_smote)
         knn_pred = predict_knn(knn_test_df, knn_clf, knn_scaler)
@@ -549,10 +564,16 @@ def main() -> int:
             "fold": fold_idx,
             "train_sample_count": len(train_records),
             "test_sample_count": len(test_records),
+            "knn_train_label_counts": {
+                str(k): int(v) for k, v in knn_train_df["label"].value_counts().sort_index().items()
+            },
+            "lstm_train_label_counts": {
+                str(k): int(v) for k, v in lstm_train_df["label"].value_counts().sort_index().items()
+            },
             "knn_window_metrics": binary_metrics(knn_pred["label"], knn_pred["enc_predict"]),
-            "knn_sample_metrics": group_any_metrics(knn_pred, "enc_predict"),
+            "knn_process_metrics": process_group_any_metrics(knn_pred, "enc_predict"),
             "lstm_window_metrics": binary_metrics(lstm_pred["label"], lstm_pred["tc_predict"]),
-            "lstm_sample_metrics": group_any_metrics(lstm_pred, "tc_predict"),
+            "lstm_process_metrics": process_group_any_metrics(lstm_pred, "tc_predict"),
             "final_step4_counts": final_counts,
             "final_step4_process_metrics": process_group_any_metrics(final_pred, "final_predict"),
             "lstm_training": lstm_train_info,
@@ -560,15 +581,15 @@ def main() -> int:
         write_json(fold_dir / "metrics.json", metrics)
         fold_metrics.append(metrics)
         print(f"fold {fold_idx} metrics:")
-        print(f"  {format_metrics('knn_sample', metrics['knn_sample_metrics'])}")
-        print(f"  {format_metrics('lstm_sample', metrics['lstm_sample_metrics'])}")
+        print(f"  {format_metrics('knn_process', metrics['knn_process_metrics'])}")
+        print(f"  {format_metrics('lstm_process', metrics['lstm_process_metrics'])}")
         print(f"  {format_metrics('final_step4_process', metrics['final_step4_process_metrics'])}")
 
     summary = {
         "folds": fold_metrics,
         "aggregate": {
-            "knn_sample_metrics": aggregate_metric_dicts([m["knn_sample_metrics"] for m in fold_metrics]),
-            "lstm_sample_metrics": aggregate_metric_dicts([m["lstm_sample_metrics"] for m in fold_metrics]),
+            "knn_process_metrics": aggregate_metric_dicts([m["knn_process_metrics"] for m in fold_metrics]),
+            "lstm_process_metrics": aggregate_metric_dicts([m["lstm_process_metrics"] for m in fold_metrics]),
             "final_step4_process_metrics": aggregate_metric_dicts(
                 [m["final_step4_process_metrics"] for m in fold_metrics]
             ),

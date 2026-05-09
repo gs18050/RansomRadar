@@ -418,6 +418,16 @@ def aggregate_metric_dicts(metric_dicts: Sequence[Dict[str, object]]) -> Dict[st
     }
 
 
+def format_metrics(name: str, metrics: Dict[str, object]) -> str:
+    return (
+        f"{name}: "
+        f"acc={float(metrics['accuracy']):.4f} "
+        f"precision={float(metrics['precision']):.4f} "
+        f"recall={float(metrics['recall']):.4f} "
+        f"f1={float(metrics['f1']):.4f}"
+    )
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Train RansomRadar KNN and LSTM models with sample-level 5-fold CV.")
     parser.add_argument("--features-root", default=str(repo_root() / "features"))
@@ -549,12 +559,10 @@ def main() -> int:
         }
         write_json(fold_dir / "metrics.json", metrics)
         fold_metrics.append(metrics)
-        print(
-            "fold "
-            f"{fold_idx} metrics: final_f1={metrics['final_step4_process_metrics']['f1']:.4f} "
-            f"knn_f1={metrics['knn_sample_metrics']['f1']:.4f} "
-            f"lstm_f1={metrics['lstm_sample_metrics']['f1']:.4f}"
-        )
+        print(f"fold {fold_idx} metrics:")
+        print(f"  {format_metrics('knn_sample', metrics['knn_sample_metrics'])}")
+        print(f"  {format_metrics('lstm_sample', metrics['lstm_sample_metrics'])}")
+        print(f"  {format_metrics('final_step4_process', metrics['final_step4_process_metrics'])}")
 
     summary = {
         "folds": fold_metrics,

@@ -13,9 +13,35 @@ By default this runs 5-fold cross-validation over samples that exist in both
 `features/1s` and `features/lstm`, saves outputs under `training_runs/<timestamp>/`,
 and trains:
 
-- KNN encryption detector on `features/1s` with MinMax scaling, `k=6`, and SMOTE.
+- KNN encryption detector on `features/1s` with MinMax scaling, `k=6`, uniform
+  weighting, and paper-style SMOTE balancing.
 - LSTM temporal-correlation detector on `features/lstm` with 10 features per timestep.
 - Step4-style final evaluator using `final_predict = enc_predict AND tc_predict`.
+
+## Tuned Defaults
+
+The paper does not specify LSTM optimizer/training hyperparameters or the
+probability threshold used to turn LSTM scores into class predictions. The script
+therefore tunes only those unspecified values:
+
+- `--class-weight-mode sqrt_balanced`
+- `--lstm-thresholds 0.5,0.6,0.7,0.8,0.9`
+- `--threshold-recall-floor 0.95`
+- `--learning-rate 3e-4`
+- `--batch-size 64`
+- `--epochs 80`
+
+For each fold, the selected LSTM threshold is chosen on the validation subset
+from the training fold using final Step4 process-level F1, preferring thresholds
+with recall at least `0.95`.
+For threshold selection, the validation KNN predictions come from a temporary
+KNN trained only on the LSTM-fit subset, not on the validation subset.
+
+Recommended next run:
+
+```bash
+python training/ransomradar_training.py
+```
 
 ## Notes
 

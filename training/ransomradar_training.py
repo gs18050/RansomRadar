@@ -222,7 +222,11 @@ def max_valid_smote_k(y: np.ndarray, requested_k: int = 5) -> int:
     return max(1, min(requested_k, minority - 1))
 
 
-def train_knn(train_df: pd.DataFrame, use_smote: bool = True) -> Tuple[KNeighborsClassifier, MinMaxScaler]:
+def train_knn(
+    train_df: pd.DataFrame,
+    use_smote: bool = True,
+    n_neighbors: int = 6,
+) -> Tuple[KNeighborsClassifier, MinMaxScaler]:
     x_train = numeric_matrix(train_df, KNN_FEATURES)
     y_train = train_df["label"].to_numpy(dtype=np.int64)
 
@@ -238,7 +242,7 @@ def train_knn(train_df: pd.DataFrame, use_smote: bool = True) -> Tuple[KNeighbor
         k_neighbors = max_valid_smote_k(y_train)
         x_train, y_train = SMOTE(k_neighbors=k_neighbors, random_state=42).fit_resample(x_train, y_train)
 
-    clf = KNeighborsClassifier(n_neighbors=6, weights="uniform", metric="minkowski")
+    clf = KNeighborsClassifier(n_neighbors=n_neighbors, weights="uniform", metric="minkowski")
     clf.fit(x_train, y_train)
     return clf, scaler
 
@@ -263,29 +267,39 @@ def prepare_lstm_arrays(df: pd.DataFrame, scaler: StandardScaler) -> Tuple[np.nd
     return x.astype(np.float32), y
 
 
-def class_weights(y: np.ndarray, device: torch.device) -> torch.Tensor:
+def class_weights(y: np.ndarray, device: torch.device, mode: str):
+    if mode == "none":
+        return None
+
     counts = np.bincount(y, minlength=2).astype(np.float32)
     counts[counts == 0] = 1.0
     weights = counts.sum() / (len(counts) * counts)
+    if mode == "sqrt_balanced":
+        weights = np.sqrt(weights)
     return torch.tensor(weights, dtype=torch.float32, device=device)
 
 
 def train_lstm(
     train_df: pd.DataFrame,
     val_df: pd.DataFrame,
+    val_knn_pred: pd.DataFrame,
+    sample_process: Dict[str, str],
+    threshold_candidates: Sequence[float],
+    recall_floor: float,
     epochs: int,
     batch_size: int,
     learning_rate: float,
+    class_weight_mode: str,
     seed: int,
     device: torch.device,
-) -> Tuple[LSTMModel, StandardScaler, Dict[str, float]]:
+) -> Tuple[LSTMModel, StandardScaler, Dict[str, object]]:
     set_seed(seed)
     scaler = fit_lstm_scaler(train_df)
     x_train, y_train = prepare_lstm_arrays(train_df, scaler)
-    x_val, y_val = prepare_lstm_arrays(val_df, scaler)
+    x_val, _ = prepare_lstm_arrays(val_df, scaler)
 
     model = LSTMModel(input_size=len(LSTM_STEP_FEATURES), hidden_size=50, num_layers=1, num_classes=2).to(device)
-    criterion = nn.CrossEntropyLoss(weight=class_weights(y_train, device))
+    criterion = nn.CrossEntropyLoss(weight=class_weights(y_train, device, class_weight_mode))
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
     generator = torch.Generator()
     generator.manual_seed(seed)
@@ -297,7 +311,8 @@ def train_lstm(
     )
 
     best_state = None
-    best_f1 = -1.0
+    best_key = (False, -1.0, -1.0, -1.0)
+    best_selection = None
     best_epoch = 0
 
     for epoch in range(1, epochs + 1):
@@ -311,36 +326,72 @@ def train_lstm(
             loss.backward()
             optimizer.step()
 
-        val_pred = predict_lstm_arrays(model, x_val, device)
-        val_f1 = f1_score(y_val, val_pred, zero_division=0)
-        if val_f1 > best_f1:
-            best_f1 = float(val_f1)
+        val_scores = predict_lstm_scores_arrays(model, x_val, device)
+        selection = select_lstm_threshold(
+            val_df,
+            val_scores,
+            val_knn_pred,
+            sample_process,
+            threshold_candidates,
+            recall_floor,
+        )
+        metric = selection["final_step4_process_metrics"]
+        key = (
+            bool(selection["meets_recall_floor"]),
+            float(metric["f1"]),
+            float(metric["recall"]),
+            float(metric["precision"]),
+        )
+        if key > best_key:
+            best_key = key
+            best_selection = selection
             best_epoch = epoch
             best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
 
     if best_state is not None:
         model.load_state_dict(best_state)
 
-    return model, scaler, {"best_val_f1": best_f1, "best_epoch": best_epoch}
+    return model, scaler, {
+        "best_epoch": best_epoch,
+        "class_weight_mode": class_weight_mode,
+        "selected_threshold": float(best_selection["threshold"]) if best_selection else 0.5,
+        "selected_threshold_meets_recall_floor": bool(best_selection["meets_recall_floor"]) if best_selection else False,
+        "selected_threshold_validation_metrics": best_selection["final_step4_process_metrics"] if best_selection else {},
+        "threshold_candidates": [float(t) for t in threshold_candidates],
+        "recall_floor": float(recall_floor),
+    }
 
 
-def predict_lstm_arrays(model: LSTMModel, x: np.ndarray, device: torch.device) -> np.ndarray:
+def predict_lstm_scores_arrays(model: LSTMModel, x: np.ndarray, device: torch.device) -> np.ndarray:
     model.eval()
-    preds: List[np.ndarray] = []
+    scores: List[np.ndarray] = []
     loader = DataLoader(LSTMDataset(x, np.zeros(len(x), dtype=np.int64)), batch_size=1024, shuffle=False)
     with torch.no_grad():
         for batch_x, _ in loader:
             logits = model(batch_x.to(device))
-            preds.append(torch.argmax(logits, dim=1).cpu().numpy())
-    return np.concatenate(preds) if preds else np.array([], dtype=np.int64)
+            probs = torch.softmax(logits, dim=1)[:, 1]
+            scores.append(probs.cpu().numpy())
+    return np.concatenate(scores) if scores else np.array([], dtype=np.float32)
 
 
-def predict_lstm(df: pd.DataFrame, model: LSTMModel, scaler: StandardScaler, device: torch.device) -> pd.DataFrame:
+def build_lstm_prediction(df: pd.DataFrame, scores: np.ndarray, threshold: float) -> pd.DataFrame:
     out = df[["source_path", "label_name", "label", "sample", "process", "Second"]].copy()
     out = out.rename(columns={"sample": "Sample", "process": "Process"})
-    x, _ = prepare_lstm_arrays(df, scaler)
-    out["tc_predict"] = predict_lstm_arrays(model, x, device).astype(int)
+    out["tc_score"] = scores
+    out["tc_predict"] = (out["tc_score"] >= threshold).astype(int)
     return out
+
+
+def predict_lstm(
+    df: pd.DataFrame,
+    model: LSTMModel,
+    scaler: StandardScaler,
+    device: torch.device,
+    threshold: float,
+) -> pd.DataFrame:
+    x, _ = prepare_lstm_arrays(df, scaler)
+    scores = predict_lstm_scores_arrays(model, x, device)
+    return build_lstm_prediction(df, scores, threshold)
 
 
 def binary_metrics(y_true: Iterable[int], y_pred: Iterable[int]) -> Dict[str, object]:
@@ -407,6 +458,43 @@ def final_step4_predictions(
     }
 
 
+def select_lstm_threshold(
+    lstm_df: pd.DataFrame,
+    lstm_scores: np.ndarray,
+    knn_pred: pd.DataFrame,
+    sample_process: Dict[str, str],
+    threshold_candidates: Sequence[float],
+    recall_floor: float,
+) -> Dict[str, object]:
+    selections = []
+    for threshold in threshold_candidates:
+        lstm_pred = build_lstm_prediction(lstm_df, lstm_scores, threshold)
+        final_pred, final_counts = final_step4_predictions(knn_pred, lstm_pred, sample_process)
+        metrics = process_group_any_metrics(final_pred, "final_predict")
+        meets_recall = float(metrics["recall"]) >= recall_floor
+        selections.append(
+            {
+                "threshold": float(threshold),
+                "meets_recall_floor": bool(meets_recall),
+                "final_step4_process_metrics": metrics,
+                "final_step4_counts": final_counts,
+            }
+        )
+
+    def selection_key(item: Dict[str, object]):
+        metrics = item["final_step4_process_metrics"]
+        return (
+            bool(item["meets_recall_floor"]),
+            float(metrics["f1"]),
+            float(metrics["recall"]),
+            float(metrics["precision"]),
+        )
+
+    best = dict(max(selections, key=selection_key))
+    best["all_threshold_metrics"] = selections
+    return best
+
+
 def write_json(path: Path, data: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as f:
@@ -443,6 +531,16 @@ def format_metrics(name: str, metrics: Dict[str, object]) -> str:
     )
 
 
+def parse_float_list(value: str) -> List[float]:
+    items = [item.strip() for item in value.split(",") if item.strip()]
+    if not items:
+        raise argparse.ArgumentTypeError("expected at least one comma-separated float")
+    try:
+        return [float(item) for item in items]
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(f"invalid float list: {value}") from exc
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Train RansomRadar KNN and LSTM models with sample-level 5-fold CV.")
     parser.add_argument("--features-root", default=str(repo_root() / "features"))
@@ -450,11 +548,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--run-name", default=None)
     parser.add_argument("--folds", type=int, default=5)
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--epochs", type=int, default=50)
+    parser.add_argument("--epochs", type=int, default=80)
     parser.add_argument("--batch-size", type=int, default=64)
-    parser.add_argument("--learning-rate", type=float, default=1e-3)
+    parser.add_argument("--learning-rate", type=float, default=3e-4)
     parser.add_argument("--validation-fraction", type=float, default=0.15)
+    parser.add_argument("--class-weight-mode", default="sqrt_balanced", choices=["none", "sqrt_balanced", "balanced"])
+    parser.add_argument("--lstm-thresholds", type=parse_float_list, default=parse_float_list("0.5,0.6,0.7,0.8,0.9"))
+    parser.add_argument("--threshold-recall-floor", type=float, default=0.95)
     parser.add_argument("--no-smote", action="store_true", help="Disable paper-style SMOTE for KNN.")
+    parser.add_argument("--knn-neighbors", type=int, default=6)
     parser.add_argument("--device", default="auto", choices=["auto", "cpu", "cuda", "mps"])
     return parser.parse_args()
 
@@ -499,7 +601,13 @@ def main() -> int:
             "batch_size": args.batch_size,
             "learning_rate": args.learning_rate,
             "validation_fraction": args.validation_fraction,
+            "class_weight_mode": args.class_weight_mode,
+            "lstm_thresholds": [float(t) for t in args.lstm_thresholds],
+            "threshold_recall_floor": args.threshold_recall_floor,
             "use_smote": not args.no_smote,
+            "knn_neighbors": args.knn_neighbors,
+            "knn_weights": "uniform",
+            "knn_smote_sampling_strategy": "auto",
             "device": str(device),
             "knn_features": KNN_FEATURES,
             "lstm_step_features": LSTM_STEP_FEATURES,
@@ -531,30 +639,52 @@ def main() -> int:
         save_records(fold_dir / "lstm_validation_samples.csv", lstm_val_records)
         save_records(fold_dir / "test_samples.csv", test_records)
 
+        knn_threshold_train_df = load_knn_frame(lstm_fit_records, sample_process)
         knn_train_df = load_knn_frame(train_records, sample_process)
+        knn_val_df = load_knn_frame(lstm_val_records, sample_process)
         knn_test_df = load_knn_frame(test_records, sample_process)
         lstm_train_df = load_lstm_frame(lstm_fit_records, sample_process)
         lstm_val_df = load_lstm_frame(lstm_val_records, sample_process)
         lstm_test_df = load_lstm_frame(test_records, sample_process)
 
-        knn_clf, knn_scaler = train_knn(knn_train_df, use_smote=not args.no_smote)
+        knn_threshold_clf, knn_threshold_scaler = train_knn(
+            knn_threshold_train_df,
+            use_smote=not args.no_smote,
+            n_neighbors=args.knn_neighbors,
+        )
+        knn_val_pred = predict_knn(knn_val_df, knn_threshold_clf, knn_threshold_scaler)
+
+        knn_clf, knn_scaler = train_knn(
+            knn_train_df,
+            use_smote=not args.no_smote,
+            n_neighbors=args.knn_neighbors,
+        )
         knn_pred = predict_knn(knn_test_df, knn_clf, knn_scaler)
         joblib.dump(knn_clf, fold_dir / "encryption_detection_clf.joblib")
         joblib.dump(knn_scaler, fold_dir / "encryption_detection_scaler.joblib")
+        knn_val_pred.to_csv(fold_dir / "knn_validation_predictions.csv", index=False)
         knn_pred.to_csv(fold_dir / "knn_predictions.csv", index=False)
 
         lstm_model, lstm_scaler, lstm_train_info = train_lstm(
             lstm_train_df,
             lstm_val_df,
+            knn_val_pred,
+            sample_process,
+            threshold_candidates=args.lstm_thresholds,
+            recall_floor=args.threshold_recall_floor,
             epochs=args.epochs,
             batch_size=args.batch_size,
             learning_rate=args.learning_rate,
+            class_weight_mode=args.class_weight_mode,
             seed=args.seed + fold_idx,
             device=device,
         )
-        lstm_pred = predict_lstm(lstm_test_df, lstm_model, lstm_scaler, device)
+        selected_threshold = float(lstm_train_info["selected_threshold"])
+        lstm_val_pred = predict_lstm(lstm_val_df, lstm_model, lstm_scaler, device, selected_threshold)
+        lstm_pred = predict_lstm(lstm_test_df, lstm_model, lstm_scaler, device, selected_threshold)
         torch.save(lstm_model.state_dict(), fold_dir / "tc_detection_clf.pth")
         joblib.dump(lstm_scaler, fold_dir / "tc_detection_scaler.joblib")
+        lstm_val_pred.to_csv(fold_dir / "lstm_validation_predictions.csv", index=False)
         lstm_pred.to_csv(fold_dir / "lstm_predictions.csv", index=False)
 
         final_pred, final_counts = final_step4_predictions(knn_pred, lstm_pred, sample_process)
@@ -581,6 +711,7 @@ def main() -> int:
         write_json(fold_dir / "metrics.json", metrics)
         fold_metrics.append(metrics)
         print(f"fold {fold_idx} metrics:")
+        print(f"  selected_lstm_threshold={selected_threshold:.4f}")
         print(f"  {format_metrics('knn_process', metrics['knn_process_metrics'])}")
         print(f"  {format_metrics('lstm_process', metrics['lstm_process_metrics'])}")
         print(f"  {format_metrics('final_step4_process', metrics['final_step4_process_metrics'])}")

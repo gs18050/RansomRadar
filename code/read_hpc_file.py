@@ -18,6 +18,16 @@ def read_hpc_file(filepath):
     df.rename(columns={'Timestamp (ms)': 'Timestamp'}, inplace=True)
 
     # transform timestamp
+    non_string_timestamps = df['Timestamp'].map(lambda value: not isinstance(value, str))
+    if non_string_timestamps.any():
+        bad_rows = df.loc[non_string_timestamps, 'Timestamp']
+        print(f"[read_hpc_file] non-string Timestamp values in {filepath}: {len(bad_rows)} rows")
+        for idx, value in bad_rows.head(50).items():
+            print(f"  row {idx + 2}: value={value!r}, type={type(value).__name__}")
+        if len(bad_rows) > 50:
+            print(f"  ... {len(bad_rows) - 50} more rows")
+        df['Timestamp'] = df['Timestamp'].astype(str)
+
     df['Timestamp'] = df['Timestamp'].str.split('.').str[0]
     df['Timestamp'] = df['Timestamp'].str.replace(',', '', regex=False).astype(int) * 10000 + starttime
 

@@ -24,8 +24,8 @@ The paper does not specify LSTM optimizer/training hyperparameters or the
 probability threshold used to turn LSTM scores into class predictions. The script
 therefore tunes only those unspecified values:
 
-- `--class-weight-mode sqrt_balanced`
-- `--lstm-thresholds 0.5,0.6,0.7,0.8,0.9`
+- `--class-weight-mode balanced`
+- `--lstm-thresholds 0.05,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9`
 - `--threshold-recall-floor 0.95`
 - `--learning-rate 3e-4`
 - `--batch-size 64`
@@ -34,6 +34,10 @@ therefore tunes only those unspecified values:
 For each fold, the selected LSTM threshold is chosen on the validation subset
 from the training fold using final Step4 process-level F1, preferring thresholds
 with recall at least `0.95`.
+If all thresholds have the same final F1, checkpoint selection falls back to
+validation score separation between positive and negative rows, then validation
+log loss, so it no longer gets stuck on epoch 1 just because every threshold
+initially predicts all negatives.
 For threshold selection, the validation KNN predictions come from a temporary
 KNN trained only on the LSTM-fit subset, not on the validation subset.
 

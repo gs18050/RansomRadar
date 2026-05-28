@@ -372,7 +372,7 @@ def train_lstm(
     set_seed(seed)
     scaler = fit_lstm_scaler(train_df)
     x_train, y_train = prepare_lstm_arrays(train_df, scaler)
-    x_val, _ = prepare_lstm_arrays(val_df, scaler)
+    x_val, y_val = prepare_lstm_arrays(val_df, scaler)
 
     model = LSTMModel(input_size=len(LSTM_STEP_FEATURES), hidden_size=50, num_layers=1, num_classes=2).to(device)
     criterion = nn.CrossEntropyLoss(weight=class_weights(y_train, device, class_weight_mode))
@@ -387,8 +387,9 @@ def train_lstm(
     )
 
     best_state = None
-    best_key = (False, -1.0, -1.0, -1.0)
+    best_key = (False, -1.0, -1.0, -1.0, -float("inf"), -float("inf"))
     best_selection = None
+    best_score_stats = None
     best_epoch = 0
 
     for epoch in range(1, epochs + 1):
@@ -412,15 +413,19 @@ def train_lstm(
             recall_floor,
         )
         metric = selection["final_step4_process_metrics"]
+        score_stats = lstm_score_stats(y_val, val_scores)
         key = (
             bool(selection["meets_recall_floor"]),
             float(metric["f1"]),
             float(metric["recall"]),
             float(metric["precision"]),
+            float(score_stats["score_separation"]),
+            -float(score_stats["log_loss"]),
         )
         if key > best_key:
             best_key = key
             best_selection = selection
+            best_score_stats = score_stats
             best_epoch = epoch
             best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
 
@@ -433,8 +438,31 @@ def train_lstm(
         "selected_threshold": float(best_selection["threshold"]) if best_selection else 0.5,
         "selected_threshold_meets_recall_floor": bool(best_selection["meets_recall_floor"]) if best_selection else False,
         "selected_threshold_validation_metrics": best_selection["final_step4_process_metrics"] if best_selection else {},
+        "selected_epoch_validation_score_stats": best_score_stats if best_score_stats else {},
         "threshold_candidates": [float(t) for t in threshold_candidates],
         "recall_floor": float(recall_floor),
+    }
+
+
+def lstm_score_stats(y_true: np.ndarray, scores: np.ndarray) -> Dict[str, float]:
+    eps = 1e-7
+    y_true = y_true.astype(np.int64)
+    scores = np.clip(scores.astype(np.float64), eps, 1.0 - eps)
+    pos_scores = scores[y_true == 1]
+    neg_scores = scores[y_true == 0]
+    pos_mean = float(pos_scores.mean()) if len(pos_scores) else 0.0
+    neg_mean = float(neg_scores.mean()) if len(neg_scores) else 0.0
+    log_loss = -float(np.mean(y_true * np.log(scores) + (1 - y_true) * np.log(1 - scores))) if len(scores) else 0.0
+    return {
+        "positive_count": int(len(pos_scores)),
+        "negative_count": int(len(neg_scores)),
+        "positive_score_mean": pos_mean,
+        "positive_score_max": float(pos_scores.max()) if len(pos_scores) else 0.0,
+        "positive_score_p95": float(np.quantile(pos_scores, 0.95)) if len(pos_scores) else 0.0,
+        "negative_score_mean": neg_mean,
+        "negative_score_max": float(neg_scores.max()) if len(neg_scores) else 0.0,
+        "score_separation": pos_mean - neg_mean,
+        "log_loss": log_loss,
     }
 
 
@@ -636,8 +664,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--batch-size", type=int, default=64)
     parser.add_argument("--learning-rate", type=float, default=3e-4)
     parser.add_argument("--validation-fraction", type=float, default=0.15)
-    parser.add_argument("--class-weight-mode", default="sqrt_balanced", choices=["none", "sqrt_balanced", "balanced"])
-    parser.add_argument("--lstm-thresholds", type=parse_float_list, default=parse_float_list("0.5,0.6,0.7,0.8,0.9"))
+    parser.add_argument("--class-weight-mode", default="balanced", choices=["none", "sqrt_balanced", "balanced"])
+    parser.add_argument(
+        "--lstm-thresholds",
+        type=parse_float_list,
+        default=parse_float_list("0.05,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9"),
+    )
     parser.add_argument("--threshold-recall-floor", type=float, default=0.95)
     parser.add_argument("--no-smote", action="store_true", help="Disable paper-style SMOTE for KNN.")
     parser.add_argument("--knn-neighbors", type=int, default=6)

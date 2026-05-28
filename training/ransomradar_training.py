@@ -111,6 +111,33 @@ def load_sample_process_map(root: Path) -> Dict[str, str]:
     return module.sample_process
 
 
+def my_prefixed_process_name(value: str) -> str:
+    value = Path(str(value)).stem
+    for prefix in ("My10_", "My_"):
+        if value.startswith(prefix):
+            process = value[len(prefix):]
+            if not process.lower().endswith(".exe"):
+                process = f"{process}.exe"
+            return process
+    return ""
+
+
+def resolve_malicious_process(sample: str, sample_process: Dict[str, str], source_path: str = "") -> str:
+    sample = str(sample)
+    if sample in sample_process:
+        return sample_process[sample]
+
+    process = my_prefixed_process_name(sample)
+    if process:
+        return process
+
+    process = my_prefixed_process_name(source_path)
+    if process:
+        return process
+
+    return ""
+
+
 def read_feature_csv(path: Path, required_columns: Sequence[str]) -> pd.DataFrame:
     df = pd.read_csv(path)
     unnamed = [c for c in df.columns if str(c).startswith("Unnamed") or str(c) == ""]
@@ -185,7 +212,11 @@ def assign_process_labels(
     if record.label_name == "benign":
         return pd.Series(np.zeros(len(df), dtype=np.int64), index=df.index)
     return (
-        df.apply(lambda row: row[process_col] == sample_process.get(row[sample_col], ""), axis=1)
+        df.apply(
+            lambda row: row[process_col]
+            == resolve_malicious_process(row[sample_col], sample_process, record.rel_path),
+            axis=1,
+        )
         .astype(np.int64)
     )
 
@@ -442,10 +473,18 @@ def final_step4_predictions(
 
     benign = merged[merged["label_name"] == "benign"].copy()
     ransomware = merged[merged["label_name"] == "ransomware"].copy()
-    mapped = ransomware["Sample"].isin(sample_process)
+    mapped_processes = ransomware.apply(
+        lambda row: resolve_malicious_process(row["Sample"], sample_process, row["source_path"]),
+        axis=1,
+    )
+    mapped = mapped_processes != ""
     mapped_ransomware = ransomware[mapped].copy()
     mapped_ransomware = mapped_ransomware[
-        mapped_ransomware.apply(lambda row: row["Process"] == sample_process.get(row["Sample"], ""), axis=1)
+        mapped_ransomware.apply(
+            lambda row: row["Process"]
+            == resolve_malicious_process(row["Sample"], sample_process, row["source_path"]),
+            axis=1,
+        )
     ]
     final_df = pd.concat([benign, mapped_ransomware], ignore_index=True)
 

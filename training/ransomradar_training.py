@@ -8,7 +8,7 @@ import sys
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Iterable, List, Sequence, Tuple
+from typing import Dict, Iterable, List, Optional, Sequence, Tuple
 
 import joblib
 import numpy as np
@@ -253,16 +253,61 @@ def max_valid_smote_k(y: np.ndarray, requested_k: int = 5) -> int:
     return max(1, min(requested_k, minority - 1))
 
 
+def print_knn_one_class_diagnostics(
+    train_df: pd.DataFrame,
+    sample_process: Dict[str, str],
+    context: str,
+) -> None:
+    label_counts = {str(k): int(v) for k, v in train_df["label"].value_counts().sort_index().items()}
+    print(f"[KNN one-class diagnostic] context={context}")
+    print(f"  label_counts={label_counts}")
+
+    ransomware_df = train_df[train_df["label_name"] == "ransomware"]
+    if ransomware_df.empty:
+        print("  no ransomware feature files are present in this KNN training subset")
+        return
+
+    print("  ransomware feature files with no positive rows:")
+    for source_path, source_df in ransomware_df.groupby("source_path", sort=True):
+        positive_rows = int(source_df["label"].sum())
+        if positive_rows > 0:
+            continue
+
+        samples = sorted(str(sample) for sample in source_df["Sample"].dropna().unique())
+        target_candidates = sorted(
+            {
+                resolve_malicious_process(sample, sample_process, source_path)
+                for sample in samples
+            }
+        )
+        processes = sorted(str(process) for process in source_df["Process"].dropna().unique())
+        print(f"    source_path={source_path}")
+        print(f"      samples={samples[:5]}")
+        print(f"      resolved_malicious_process={target_candidates}")
+        print(f"      available_processes_first_30={processes[:30]}")
+
+
 def train_knn(
     train_df: pd.DataFrame,
     use_smote: bool = True,
     n_neighbors: int = 6,
+    sample_process: Optional[Dict[str, str]] = None,
+    context: str = "KNN",
 ) -> Tuple[KNeighborsClassifier, MinMaxScaler]:
     x_train = numeric_matrix(train_df, KNN_FEATURES)
     y_train = train_df["label"].to_numpy(dtype=np.int64)
 
     scaler = MinMaxScaler()
     x_train = scaler.fit_transform(x_train)
+
+    classes = np.unique(y_train)
+    if use_smote and len(classes) <= 1:
+        if sample_process is not None:
+            print_knn_one_class_diagnostics(train_df, sample_process, context)
+        raise ValueError(
+            f"{context}: KNN training data has only one class: {classes.tolist()}. "
+            "SMOTE requires both benign and ransomware positive rows."
+        )
 
     if use_smote:
         if SMOTE is None:
@@ -685,11 +730,16 @@ def main() -> int:
         lstm_train_df = load_lstm_frame(lstm_fit_records, sample_process)
         lstm_val_df = load_lstm_frame(lstm_val_records, sample_process)
         lstm_test_df = load_lstm_frame(test_records, sample_process)
+        knn_threshold_label_counts = {
+            str(k): int(v) for k, v in knn_threshold_train_df["label"].value_counts().sort_index().items()
+        }
 
         knn_threshold_clf, knn_threshold_scaler = train_knn(
             knn_threshold_train_df,
             use_smote=not args.no_smote,
             n_neighbors=args.knn_neighbors,
+            sample_process=sample_process,
+            context=f"fold {fold_idx} threshold KNN",
         )
         knn_val_pred = predict_knn(knn_val_df, knn_threshold_clf, knn_threshold_scaler)
 
@@ -697,6 +747,8 @@ def main() -> int:
             knn_train_df,
             use_smote=not args.no_smote,
             n_neighbors=args.knn_neighbors,
+            sample_process=sample_process,
+            context=f"fold {fold_idx} final KNN",
         )
         knn_pred = predict_knn(knn_test_df, knn_clf, knn_scaler)
         joblib.dump(knn_clf, fold_dir / "encryption_detection_clf.joblib")
@@ -739,6 +791,7 @@ def main() -> int:
             "lstm_train_label_counts": {
                 str(k): int(v) for k, v in lstm_train_df["label"].value_counts().sort_index().items()
             },
+            "knn_threshold_train_label_counts": knn_threshold_label_counts,
             "knn_window_metrics": binary_metrics(knn_pred["label"], knn_pred["enc_predict"]),
             "knn_process_metrics": process_group_any_metrics(knn_pred, "enc_predict"),
             "lstm_window_metrics": binary_metrics(lstm_pred["label"], lstm_pred["tc_predict"]),
@@ -750,6 +803,7 @@ def main() -> int:
         write_json(fold_dir / "metrics.json", metrics)
         fold_metrics.append(metrics)
         print(f"fold {fold_idx} metrics:")
+        print(f"  knn_threshold_train_label_counts={knn_threshold_label_counts}")
         print(f"  selected_lstm_threshold={selected_threshold:.4f}")
         print(f"  {format_metrics('knn_process', metrics['knn_process_metrics'])}")
         print(f"  {format_metrics('lstm_process', metrics['lstm_process_metrics'])}")

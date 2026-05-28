@@ -55,5 +55,8 @@ python training/ransomradar_training.py
   the held-out fold is not used for training decisions.
 - Final metrics group by `(Sample, Process)`. Ransomware rows use `code/sample_process.py`
   to filter to the known malicious process, matching `step4_final_result.py`.
+- If a KNN training subset has only one class, training stops and prints which ransomware
+  feature files had no positive rows, including the resolved malicious process name and
+  available process names from that feature file.
 - The LSTM intentionally uses `input_size=10` to match the current `step3_temporal_correlation_detection.py`
   feature list.

@@ -247,6 +247,129 @@ def load_lstm_frame(records: Sequence[SampleRecord], sample_process: Dict[str, s
     return pd.concat(frames, ignore_index=True)
 
 
+def label_counts_dict(df: pd.DataFrame) -> Dict[str, int]:
+    return {str(k): int(v) for k, v in df["label"].value_counts().sort_index().items()}
+
+
+def allocate_middle_crop_counts(group_sizes: pd.Series, target_total: int) -> pd.Series:
+    total = int(group_sizes.sum())
+    if target_total >= total:
+        return group_sizes.astype(int)
+    if target_total <= 0:
+        return pd.Series(0, index=group_sizes.index, dtype=np.int64)
+
+    raw = group_sizes.astype(float) * (float(target_total) / float(total))
+    if target_total >= len(group_sizes):
+        counts = np.floor(raw).astype(int).clip(lower=1, upper=group_sizes.astype(int))
+    else:
+        counts = np.floor(raw).astype(int).clip(lower=0, upper=group_sizes.astype(int))
+
+    counts = pd.Series(counts, index=group_sizes.index, dtype=np.int64)
+    diff = int(target_total - counts.sum())
+    if diff > 0:
+        fractions = raw - np.floor(raw)
+        candidates = pd.DataFrame(
+            {
+                "fraction": fractions,
+                "size": group_sizes,
+                "capacity": group_sizes.astype(int) - counts,
+            }
+        )
+        candidates = candidates[candidates["capacity"] > 0]
+        order = candidates.sort_values(["fraction", "size"], ascending=[False, False]).index
+        for key in order:
+            if diff <= 0:
+                break
+            add = min(diff, int(candidates.loc[key, "capacity"]))
+            counts.loc[key] += add
+            diff -= add
+    elif diff < 0:
+        removable_floor = 1 if target_total >= len(group_sizes) else 0
+        fractions = raw - np.floor(raw)
+        candidates = pd.DataFrame(
+            {
+                "fraction": fractions,
+                "size": group_sizes,
+                "removable": counts - removable_floor,
+            }
+        )
+        candidates = candidates[candidates["removable"] > 0]
+        order = candidates.sort_values(["fraction", "size"], ascending=[True, True]).index
+        for key in order:
+            if diff >= 0:
+                break
+            remove = min(-diff, int(candidates.loc[key, "removable"]))
+            counts.loc[key] -= remove
+            diff += remove
+
+    if int(counts.sum()) != target_total:
+        raise RuntimeError(
+            f"could not allocate middle crop counts: target={target_total}, allocated={int(counts.sum())}"
+        )
+    return counts.astype(int)
+
+
+def middle_crop_lstm_negative_rows(
+    df: pd.DataFrame,
+    target_negative_positive_ratio: Optional[float],
+) -> Tuple[pd.DataFrame, Dict[str, object]]:
+    before = label_counts_dict(df)
+    info: Dict[str, object] = {
+        "enabled": target_negative_positive_ratio is not None,
+        "target_negative_positive_ratio": (
+            float(target_negative_positive_ratio) if target_negative_positive_ratio is not None else None
+        ),
+        "before": before,
+        "after": before,
+        "target_negative_count": None,
+        "kept_negative_count": int((df["label"] == 0).sum()),
+        "cropped_negative_count": 0,
+        "reason": "disabled",
+    }
+    if target_negative_positive_ratio is None:
+        return df, info
+
+    positive_count = int((df["label"] == 1).sum())
+    negative_count = int((df["label"] == 0).sum())
+    target_negative_count = int(math.floor(positive_count * target_negative_positive_ratio))
+    info["target_negative_count"] = target_negative_count
+
+    if positive_count <= 0:
+        info["reason"] = "no_positive_rows"
+        return df, info
+    if negative_count <= target_negative_count:
+        info["reason"] = "already_within_target_ratio"
+        return df, info
+
+    positive_df = df[df["label"] == 1]
+    negative_df = df[df["label"] == 0]
+    group_cols = ["source_path", "sample", "process"]
+    group_sizes = negative_df.groupby(group_cols, sort=False).size()
+    keep_counts = allocate_middle_crop_counts(group_sizes, target_negative_count)
+
+    kept_negative_indices: List[int] = []
+    for key, group in negative_df.groupby(group_cols, sort=False):
+        keep_count = int(keep_counts.loc[key])
+        if keep_count <= 0:
+            continue
+        ordered = group.sort_values("Second", kind="mergesort")
+        start = (len(ordered) - keep_count) // 2
+        kept_negative_indices.extend(ordered.index[start : start + keep_count].tolist())
+
+    kept_indices = sorted(positive_df.index.tolist() + kept_negative_indices)
+    cropped = df.loc[kept_indices].reset_index(drop=True)
+    after = label_counts_dict(cropped)
+    info.update(
+        {
+            "after": after,
+            "kept_negative_count": int(after.get("0", 0)),
+            "cropped_negative_count": int(negative_count - after.get("0", 0)),
+            "reason": "cropped",
+        }
+    )
+    return cropped, info
+
+
 def max_valid_smote_k(y: np.ndarray, requested_k: int = 5) -> int:
     _, counts = np.unique(y, return_counts=True)
     minority = int(counts.min())
@@ -671,6 +794,15 @@ def parse_args() -> argparse.Namespace:
         default=parse_float_list("0.05,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9"),
     )
     parser.add_argument("--threshold-recall-floor", type=float, default=0.95)
+    parser.add_argument(
+        "--lstm-train-negative-positive-ratio",
+        type=float,
+        default=None,
+        help=(
+            "If set, crop only LSTM training negative rows with per-process middle crop so "
+            "negative:positive is at most this ratio. Validation/test data and KNN are unchanged."
+        ),
+    )
     parser.add_argument("--no-smote", action="store_true", help="Disable paper-style SMOTE for KNN.")
     parser.add_argument("--knn-neighbors", type=int, default=6)
     parser.add_argument("--device", default="auto", choices=["auto", "cpu", "cuda", "mps"])
@@ -689,6 +821,9 @@ def choose_device(name: str) -> torch.device:
 
 def main() -> int:
     args = parse_args()
+    if args.lstm_train_negative_positive_ratio is not None and args.lstm_train_negative_positive_ratio <= 0:
+        raise ValueError("--lstm-train-negative-positive-ratio must be greater than 0")
+
     set_seed(args.seed)
     root = repo_root()
     features_root = Path(args.features_root).resolve()
@@ -720,6 +855,7 @@ def main() -> int:
             "class_weight_mode": args.class_weight_mode,
             "lstm_thresholds": [float(t) for t in args.lstm_thresholds],
             "threshold_recall_floor": args.threshold_recall_floor,
+            "lstm_train_negative_positive_ratio": args.lstm_train_negative_positive_ratio,
             "use_smote": not args.no_smote,
             "knn_neighbors": args.knn_neighbors,
             "knn_weights": "uniform",
@@ -762,6 +898,10 @@ def main() -> int:
         lstm_train_df = load_lstm_frame(lstm_fit_records, sample_process)
         lstm_val_df = load_lstm_frame(lstm_val_records, sample_process)
         lstm_test_df = load_lstm_frame(test_records, sample_process)
+        lstm_train_df, lstm_crop_info = middle_crop_lstm_negative_rows(
+            lstm_train_df,
+            args.lstm_train_negative_positive_ratio,
+        )
         knn_threshold_label_counts = {
             str(k): int(v) for k, v in knn_threshold_train_df["label"].value_counts().sort_index().items()
         }
@@ -823,6 +963,7 @@ def main() -> int:
             "lstm_train_label_counts": {
                 str(k): int(v) for k, v in lstm_train_df["label"].value_counts().sort_index().items()
             },
+            "lstm_train_negative_positive_crop": lstm_crop_info,
             "knn_threshold_train_label_counts": knn_threshold_label_counts,
             "knn_window_metrics": binary_metrics(knn_pred["label"], knn_pred["enc_predict"]),
             "knn_process_metrics": process_group_any_metrics(knn_pred, "enc_predict"),
@@ -836,6 +977,13 @@ def main() -> int:
         fold_metrics.append(metrics)
         print(f"fold {fold_idx} metrics:")
         print(f"  knn_threshold_train_label_counts={knn_threshold_label_counts}")
+        if lstm_crop_info["enabled"]:
+            print(
+                "  lstm_train_negative_positive_crop="
+                f"ratio={lstm_crop_info['target_negative_positive_ratio']} "
+                f"before={lstm_crop_info['before']} after={lstm_crop_info['after']} "
+                f"reason={lstm_crop_info['reason']}"
+            )
         print(f"  selected_lstm_threshold={selected_threshold:.4f}")
         print(f"  {format_metrics('knn_process', metrics['knn_process_metrics'])}")
         print(f"  {format_metrics('lstm_process', metrics['lstm_process_metrics'])}")

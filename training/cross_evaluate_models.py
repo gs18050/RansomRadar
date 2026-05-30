@@ -326,9 +326,44 @@ def load_lstm_model(path: Path) -> Tuple[LSTMModel, Dict[str, int]]:
     return model, architecture
 
 
-def prepare_lstm_arrays(df: pd.DataFrame, scaler, input_size: int) -> np.ndarray:
-    x = scaler.transform(numeric_matrix(df, lstm_features(input_size)))
-    return x.reshape(-1, LSTM_STEPS, input_size).astype(np.float32)
+def scaler_input_size(scaler) -> int:
+    feature_count = getattr(scaler, "n_features_in_", None)
+    if feature_count is None and hasattr(scaler, "mean_"):
+        feature_count = len(scaler.mean_)
+    if feature_count is None:
+        raise RuntimeError("could not infer LSTM scaler input feature count")
+    feature_count = int(feature_count)
+    if feature_count % LSTM_STEPS != 0:
+        raise RuntimeError(f"LSTM scaler feature count must be divisible by {LSTM_STEPS}: {feature_count}")
+    input_size = feature_count // LSTM_STEPS
+    if input_size not in {10, 11}:
+        raise RuntimeError(f"unsupported LSTM scaler input size={input_size}; expected 10 or 11")
+    return input_size
+
+
+def prepare_lstm_arrays(
+    df: pd.DataFrame,
+    scaler,
+    scaler_feature_size: int,
+    model_input_size: int,
+) -> Tuple[np.ndarray, Dict[str, object]]:
+    x = scaler.transform(numeric_matrix(df, lstm_features(scaler_feature_size)))
+    x = x.reshape(-1, LSTM_STEPS, scaler_feature_size).astype(np.float32)
+    adapter = {
+        "scaler_input_size": int(scaler_feature_size),
+        "model_input_size": int(model_input_size),
+        "mode": "none",
+    }
+    if scaler_feature_size < model_input_size:
+        pad_width = model_input_size - scaler_feature_size
+        x = np.pad(x, ((0, 0), (0, 0), (0, pad_width)), mode="constant")
+        adapter["mode"] = "zero_pad"
+        adapter["padded_features_per_step"] = int(pad_width)
+    elif scaler_feature_size > model_input_size:
+        x = x[:, :, :model_input_size]
+        adapter["mode"] = "truncate"
+        adapter["truncated_features_per_step"] = int(scaler_feature_size - model_input_size)
+    return x.astype(np.float32), adapter
 
 
 def predict_knn(df: pd.DataFrame, clf, scaler) -> pd.DataFrame:
@@ -391,12 +426,18 @@ def evaluate_bundle(
     save_predictions: bool,
 ) -> Dict[str, object]:
     output_dir.mkdir(parents=True, exist_ok=True)
-    input_size = int(bundle["lstm_architecture"]["input_size"])
+    model_input_size = int(bundle["lstm_architecture"]["input_size"])
+    scaler_feature_size = scaler_input_size(bundle["lstm_scaler"])
     knn_df = load_knn_frame(records, sample_process)
-    lstm_df = load_lstm_frame(records, sample_process, input_size)
+    lstm_df = load_lstm_frame(records, sample_process, scaler_feature_size)
 
     knn_pred = predict_knn(knn_df, bundle["knn_clf"], bundle["knn_scaler"])
-    x_lstm = prepare_lstm_arrays(lstm_df, bundle["lstm_scaler"], input_size)
+    x_lstm, lstm_input_adapter = prepare_lstm_arrays(
+        lstm_df,
+        bundle["lstm_scaler"],
+        scaler_feature_size,
+        model_input_size,
+    )
     lstm_scores = predict_lstm_scores(bundle["lstm_model"], x_lstm)
     lstm_pred = build_lstm_prediction(lstm_df, lstm_scores, float(bundle["threshold"]))
     final_pred, final_counts = final_step4_predictions(knn_pred, lstm_pred, sample_process)
@@ -404,6 +445,7 @@ def evaluate_bundle(
     metrics = {
         "model_dir": bundle["model_dir"],
         "lstm_architecture": bundle["lstm_architecture"],
+        "lstm_input_adapter": lstm_input_adapter,
         "lstm_threshold": float(bundle["threshold"]),
         "sample_count": len(records),
         "label_counts": {

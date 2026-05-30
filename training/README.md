@@ -5,18 +5,31 @@ It does not modify the existing inference code in `code/` or the shipped models 
 
 ## Command
 
+First create the filtered LSTM feature directory. This keeps benign LSTM files
+unchanged, but for ransomware LSTM files keeps only rows from the resolved
+ransomware process.
+
+```bash
+python code/step1_5_filter_lstm_ransomware_process.py
+```
+
+The output is written to `features/lstm_process_filtered`.
+
 ```bash
 python training/ransomradar_training.py
 ```
 
 By default this runs 5-fold cross-validation over samples that exist in both
-`features/1s` and `features/lstm`, saves outputs under `training_runs/<timestamp>/`,
+`features/1s` and `features/lstm_process_filtered`, saves outputs under `training_runs/<timestamp>/`,
 and trains:
 
 - KNN encryption detector on `features/1s` with MinMax scaling, `k=6`, uniform
   weighting, and paper-style SMOTE balancing.
-- LSTM temporal-correlation detector on `features/lstm` with 10 features per timestep.
+- LSTM temporal-correlation detector on `features/lstm_process_filtered` with 10 features per timestep.
 - Step4-style final evaluator using `final_predict = enc_predict AND tc_predict`.
+
+Use `--lstm-dir-name lstm` to train from the original unfiltered LSTM feature
+directory instead.
 
 ## Tuned Defaults
 

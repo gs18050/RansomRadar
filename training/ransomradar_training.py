@@ -155,11 +155,11 @@ def numeric_matrix(df: pd.DataFrame, columns: Sequence[str]) -> np.ndarray:
     return data.to_numpy(dtype=np.float32)
 
 
-def discover_paired_samples(features_root: Path) -> List[SampleRecord]:
+def discover_paired_samples(features_root: Path, lstm_dir_name: str) -> List[SampleRecord]:
     records: List[SampleRecord] = []
     for label_name, label in [("benign", 0), ("ransomware", 1)]:
         one_s_dir = features_root / "1s" / label_name
-        lstm_dir = features_root / "lstm" / label_name
+        lstm_dir = features_root / lstm_dir_name / label_name
         one_s = {p.name: p for p in one_s_dir.glob("*.csv")}
         lstm = {p.name: p for p in lstm_dir.glob("*.csv")}
         for filename in sorted(set(one_s) & set(lstm)):
@@ -779,6 +779,15 @@ def parse_float_list(value: str) -> List[float]:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Train RansomRadar KNN and LSTM models with sample-level 5-fold CV.")
     parser.add_argument("--features-root", default=str(repo_root() / "features"))
+    parser.add_argument(
+        "--lstm-dir-name",
+        default="lstm_process_filtered",
+        help=(
+            "LSTM feature directory name under features root. Default expects output from "
+            "code/step1_5_filter_lstm_ransomware_process.py. Use --lstm-dir-name lstm "
+            "to train with the unfiltered original LSTM features."
+        ),
+    )
     parser.add_argument("--output-dir", default=str(repo_root() / "training_runs"))
     parser.add_argument("--run-name", default=None)
     parser.add_argument("--folds", type=int, default=5)
@@ -831,9 +840,20 @@ def main() -> int:
     run_dir = Path(args.output_dir).resolve() / run_name
     device = choose_device(args.device)
 
-    records = discover_paired_samples(features_root)
+    lstm_feature_root = features_root / args.lstm_dir_name
+    if not lstm_feature_root.exists():
+        raise RuntimeError(
+            f"LSTM feature directory does not exist: {lstm_feature_root}. "
+            "Run `python code/step1_5_filter_lstm_ransomware_process.py` first, "
+            "or pass `--lstm-dir-name lstm` to use the original unfiltered LSTM features."
+        )
+
+    records = discover_paired_samples(features_root, args.lstm_dir_name)
     if not records:
-        raise RuntimeError(f"no paired feature samples found under {features_root}")
+        raise RuntimeError(
+            f"no paired feature samples found under {features_root} using LSTM directory "
+            f"{args.lstm_dir_name!r}"
+        )
 
     labels = [r.label for r in records]
     label_counts = {str(label): int(labels.count(label)) for label in sorted(set(labels))}
@@ -846,6 +866,7 @@ def main() -> int:
         run_dir / "config.json",
         {
             "features_root": str(features_root),
+            "lstm_dir_name": args.lstm_dir_name,
             "folds": args.folds,
             "seed": args.seed,
             "epochs": args.epochs,

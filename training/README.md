@@ -60,6 +60,23 @@ Recommended next run:
 python training/ransomradar_training.py
 ```
 
+## Cross Evaluation
+
+To evaluate the shipped `models/` and a new 5-fold training run on both the
+legacy dataset and the current dataset:
+
+```bash
+python training/cross_evaluate_models.py --new-run-name 20260530_173056
+```
+
+Expected data layout:
+
+- Current data: `features/1s/<label>/*.csv` and `features/lstm_process_filtered/<label>/*.csv`
+- Legacy data: `features/1s/<label>/legacy/*.csv` and `features/lstm/<label>/legacy/*.csv`
+
+The legacy model uses LSTM threshold `0.5`. The new fold models use each fold's
+saved `metrics.json` selected LSTM threshold.
+
 ## Notes
 
 - The fold group is the paired CSV path, so rows from the same time-series file never cross folds.

@@ -66,7 +66,7 @@ To evaluate the shipped `models/` and a new 5-fold training run on both the
 legacy dataset and the current dataset:
 
 ```bash
-python training/cross_evaluate_models.py --new-run-name 20260530_173056
+python training/cross_evaluate_models.py --legacy-run-name <legacy_run> --new-run-name 20260530_173056
 ```
 
 Expected data layout:
@@ -74,8 +74,10 @@ Expected data layout:
 - Current data: `features/1s/<label>/*.csv` and `features/lstm_process_filtered/<label>/*.csv`
 - Legacy data: `features/1s/<label>/legacy/*.csv` and `features/lstm/<label>/legacy/*.csv`
 
-The legacy model uses LSTM threshold `0.5`. The new fold models use each fold's
-saved `metrics.json` selected LSTM threshold.
+If `--legacy-run-name` is provided, both legacy and new models are loaded from
+`training_runs/<run>/fold_*` and use each fold's saved `metrics.json` selected
+LSTM threshold. If `--legacy-run-name` is omitted, the shipped `models/`
+artifact is used for the legacy model with LSTM threshold `0.5`.
 
 ## Notes
 

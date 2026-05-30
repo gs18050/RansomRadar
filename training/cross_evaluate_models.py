@@ -522,11 +522,60 @@ def format_aggregate(aggregate: Dict[str, object]) -> str:
     )
 
 
+def evaluate_training_run(
+    run_dir: Path,
+    model_label: str,
+    dataset_name: str,
+    records: Sequence[SampleRecord],
+    sample_process: Dict[str, str],
+    output_root: Path,
+    save_predictions: bool,
+) -> Dict[str, object]:
+    fold_metrics = []
+    dataset_output_dir = output_root / f"{model_label}_on_{dataset_name}"
+    for fold_dir in sorted(run_dir.glob("fold_*")):
+        if not fold_dir.is_dir():
+            continue
+        threshold = new_fold_threshold(fold_dir)
+        bundle = load_model_bundle(fold_dir, threshold=threshold)
+        metrics = evaluate_bundle(
+            bundle,
+            records,
+            sample_process,
+            dataset_output_dir / fold_dir.name,
+            save_predictions=save_predictions,
+        )
+        fold_metrics.append(metrics)
+        print(f"{model_label} {fold_dir.name} on {dataset_name}: {format_final_metrics(metrics)}")
+
+    if not fold_metrics:
+        raise RuntimeError(f"no fold directories found under {run_dir}")
+
+    aggregate = aggregate_fold_results(fold_metrics)
+    write_json(dataset_output_dir / "aggregate_metrics.json", aggregate)
+    print(f"{model_label} mean on {dataset_name}: {format_aggregate(aggregate)}")
+    return {
+        "run_dir": str(run_dir),
+        "threshold_source": "fold metrics.json lstm_training.selected_threshold",
+        "folds": fold_metrics,
+        "aggregate": aggregate,
+    }
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Cross-evaluate legacy and newly trained RansomRadar models.")
     parser.add_argument("--features-root", default=str(repo_root() / "features"))
     parser.add_argument("--legacy-model-dir", default=str(repo_root() / "models"))
     parser.add_argument("--training-runs-dir", default=str(repo_root() / "training_runs"))
+    parser.add_argument(
+        "--legacy-run-name",
+        default=None,
+        help=(
+            "Training run name for the model trained on the legacy dataset. If set, "
+            "fold_*/ models from this run are evaluated and averaged, same as --new-run-name. "
+            "If omitted, the single shipped models/ artifact is used with threshold 0.5."
+        ),
+    )
     parser.add_argument("--new-run-name", required=True)
     parser.add_argument("--new-lstm-dir-name", default="lstm_process_filtered")
     parser.add_argument("--legacy-lstm-dir-name", default="lstm")
@@ -541,11 +590,15 @@ def main() -> int:
     root = repo_root()
     features_root = Path(args.features_root).resolve()
     legacy_model_dir = Path(args.legacy_model_dir).resolve()
+    legacy_run_dir = Path(args.training_runs_dir).resolve() / args.legacy_run_name if args.legacy_run_name else None
     new_run_dir = Path(args.training_runs_dir).resolve() / args.new_run_name
-    run_name = args.run_name or f"{args.new_run_name}_cross_eval_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+    run_prefix = f"{args.legacy_run_name}_vs_{args.new_run_name}" if args.legacy_run_name else args.new_run_name
+    run_name = args.run_name or f"{run_prefix}_cross_eval_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
     output_root = Path(args.output_dir).resolve() / run_name
 
-    if not legacy_model_dir.exists():
+    if legacy_run_dir is not None and not legacy_run_dir.exists():
+        raise RuntimeError(f"legacy training run directory does not exist: {legacy_run_dir}")
+    if legacy_run_dir is None and not legacy_model_dir.exists():
         raise RuntimeError(f"legacy model directory does not exist: {legacy_model_dir}")
     if not new_run_dir.exists():
         raise RuntimeError(f"new training run directory does not exist: {new_run_dir}")
@@ -564,10 +617,13 @@ def main() -> int:
         {
             "features_root": str(features_root),
             "legacy_model_dir": str(legacy_model_dir),
+            "legacy_run_dir": str(legacy_run_dir) if legacy_run_dir is not None else None,
             "new_run_dir": str(new_run_dir),
             "legacy_lstm_dir_name": args.legacy_lstm_dir_name,
             "new_lstm_dir_name": args.new_lstm_dir_name,
-            "legacy_model_lstm_threshold": 0.5,
+            "legacy_model_lstm_threshold": (
+                "fold metrics.json lstm_training.selected_threshold" if legacy_run_dir is not None else 0.5
+            ),
             "new_model_lstm_threshold_source": "fold metrics.json lstm_training.selected_threshold",
             "dataset_sample_counts": {name: len(records) for name, records in datasets.items()},
         },
@@ -575,7 +631,6 @@ def main() -> int:
     for dataset_name, records in datasets.items():
         write_json(output_root / f"{dataset_name}_samples.json", [record_to_json(record) for record in records])
 
-    legacy_bundle = load_model_bundle(legacy_model_dir, threshold=0.5)
     summary: Dict[str, object] = {"legacy_model": {}, "new_model": {}}
 
     print(f"output: {output_root}")
@@ -583,42 +638,38 @@ def main() -> int:
     print(f"new samples: {len(datasets['new_data'])}")
 
     for dataset_name, records in datasets.items():
-        metrics = evaluate_bundle(
-            legacy_bundle,
-            records,
-            sample_process,
-            output_root / f"legacy_model_on_{dataset_name}",
-            save_predictions=args.save_predictions,
-        )
-        summary["legacy_model"][dataset_name] = metrics
-        print(f"legacy_model on {dataset_name}: {format_final_metrics(metrics)}")
-
-    for dataset_name, records in datasets.items():
-        fold_metrics = []
-        dataset_output_dir = output_root / f"new_model_on_{dataset_name}"
-        for fold_dir in sorted(new_run_dir.glob("fold_*")):
-            if not fold_dir.is_dir():
-                continue
-            threshold = new_fold_threshold(fold_dir)
-            bundle = load_model_bundle(fold_dir, threshold=threshold)
-            metrics = evaluate_bundle(
-                bundle,
+        if legacy_run_dir is not None:
+            summary["legacy_model"][dataset_name] = evaluate_training_run(
+                legacy_run_dir,
+                "legacy_model",
+                dataset_name,
                 records,
                 sample_process,
-                dataset_output_dir / fold_dir.name,
+                output_root,
+                args.save_predictions,
+            )
+        else:
+            legacy_bundle = load_model_bundle(legacy_model_dir, threshold=0.5)
+            metrics = evaluate_bundle(
+                legacy_bundle,
+                records,
+                sample_process,
+                output_root / f"legacy_model_on_{dataset_name}",
                 save_predictions=args.save_predictions,
             )
-            fold_metrics.append(metrics)
-            print(f"new_model {fold_dir.name} on {dataset_name}: {format_final_metrics(metrics)}")
-        if not fold_metrics:
-            raise RuntimeError(f"no fold directories found under {new_run_dir}")
-        aggregate = aggregate_fold_results(fold_metrics)
-        summary["new_model"][dataset_name] = {
-            "folds": fold_metrics,
-            "aggregate": aggregate,
-        }
-        write_json(dataset_output_dir / "aggregate_metrics.json", aggregate)
-        print(f"new_model mean on {dataset_name}: {format_aggregate(aggregate)}")
+            summary["legacy_model"][dataset_name] = metrics
+            print(f"legacy_model on {dataset_name}: {format_final_metrics(metrics)}")
+
+    for dataset_name, records in datasets.items():
+        summary["new_model"][dataset_name] = evaluate_training_run(
+            new_run_dir,
+            "new_model",
+            dataset_name,
+            records,
+            sample_process,
+            output_root,
+            args.save_predictions,
+        )
 
     write_json(output_root / "summary_metrics.json", summary)
     print(f"summary written: {output_root / 'summary_metrics.json'}")

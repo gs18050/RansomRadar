@@ -79,6 +79,9 @@ If `--legacy-run-name` is provided, both legacy and new models are loaded from
 LSTM threshold. If `--legacy-run-name` is omitted, the shipped `models/`
 artifact is used for the legacy model with LSTM threshold `0.5`.
 
+Use `--cross-only` to run only `legacy_model on new_data` and
+`new_model on legacy_data`.
+
 ## Notes
 
 - The fold group is the paired CSV path, so rows from the same time-series file never cross folds.

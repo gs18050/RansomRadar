@@ -208,6 +208,8 @@ def load_knn_frame(records: Sequence[SampleRecord], sample_process: Dict[str, st
     frames = []
     for record in records:
         df = read_feature_csv(record.one_s_path, KNN_FEATURES + ["Sample", "Process", "Second"])
+        if df.empty:
+            continue
         df = df.copy()
         df["label"] = assign_process_labels(df, record, sample_process, "Sample", "Process")
         df["label_name"] = record.label_name
@@ -226,6 +228,8 @@ def load_lstm_frame(
     required = feature_cols + ["sample", "process", "starttime"]
     for record in records:
         df = read_feature_csv(record.lstm_path, required)
+        if df.empty:
+            continue
         df = df.copy()
         df["label"] = assign_process_labels(df, record, sample_process, "sample", "process")
         df["label_name"] = record.label_name
@@ -581,6 +585,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--legacy-lstm-dir-name", default="lstm")
     parser.add_argument("--output-dir", default=str(repo_root() / "cross_eval_runs"))
     parser.add_argument("--run-name", default=None)
+    parser.add_argument(
+        "--cross-only",
+        action="store_true",
+        help="Evaluate only legacy_model on new_data and new_model on legacy_data.",
+    )
     parser.add_argument("--save-predictions", action="store_true")
     return parser.parse_args()
 
@@ -625,6 +634,7 @@ def main() -> int:
                 "fold metrics.json lstm_training.selected_threshold" if legacy_run_dir is not None else 0.5
             ),
             "new_model_lstm_threshold_source": "fold metrics.json lstm_training.selected_threshold",
+            "cross_only": args.cross_only,
             "dataset_sample_counts": {name: len(records) for name, records in datasets.items()},
         },
     )
@@ -637,7 +647,11 @@ def main() -> int:
     print(f"legacy samples: {len(datasets['legacy_data'])}")
     print(f"new samples: {len(datasets['new_data'])}")
 
-    for dataset_name, records in datasets.items():
+    legacy_dataset_items = datasets.items()
+    if args.cross_only:
+        legacy_dataset_items = [("new_data", datasets["new_data"])]
+
+    for dataset_name, records in legacy_dataset_items:
         if legacy_run_dir is not None:
             summary["legacy_model"][dataset_name] = evaluate_training_run(
                 legacy_run_dir,
@@ -660,7 +674,11 @@ def main() -> int:
             summary["legacy_model"][dataset_name] = metrics
             print(f"legacy_model on {dataset_name}: {format_final_metrics(metrics)}")
 
-    for dataset_name, records in datasets.items():
+    new_dataset_items = datasets.items()
+    if args.cross_only:
+        new_dataset_items = [("legacy_data", datasets["legacy_data"])]
+
+    for dataset_name, records in new_dataset_items:
         summary["new_model"][dataset_name] = evaluate_training_run(
             new_run_dir,
             "new_model",

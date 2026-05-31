@@ -87,9 +87,9 @@ Use `--cross-only` to run only `legacy_model on new_data` and
 - The fold group is the paired CSV path, so rows from the same time-series file never cross folds.
 - Labels are process-specific: benign files are all `0`; ransomware files are `1` only for
   rows where the process matches `code/sample_process.py`, and other processes are `0`.
-- Ransomware samples not listed in `code/sample_process.py` use a fallback rule when either
-  the CSV `Sample` value or source filename starts with `My10_` or `My_`: remove that prefix
-  and append `.exe` to get the malicious process name.
+- Ransomware process resolution checks `code/sample_process.py` first. Only samples not listed
+  there use a fallback rule when either the CSV `Sample` value or source filename starts with
+  `My10_` or `My_`: remove that prefix and append `.exe` to get the malicious process name.
 - LSTM early model selection uses a validation split carved only from each training fold;
   the held-out fold is not used for training decisions.
 - Final metrics group by `(Sample, Process)`. Ransomware rows use `code/sample_process.py`

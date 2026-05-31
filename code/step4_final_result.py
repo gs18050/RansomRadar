@@ -14,6 +14,39 @@ def normalize_process_name(process_name):
     return str(process_name).strip().lower()
 
 
+def my_prefixed_process_name(value):
+    value = os.path.splitext(os.path.basename(str(value)))[0]
+    for prefix in ('My10_', 'My_'):
+        if value.startswith(prefix):
+            process = value[len(prefix):]
+            if not process.lower().endswith('.exe'):
+                process = f'{process}.exe'
+            return process
+    return ''
+
+
+def resolve_malicious_process(sample, source_path=''):
+    sample = str(sample)
+    lookup_candidates = [
+        sample,
+        os.path.splitext(os.path.basename(sample))[0],
+        os.path.splitext(os.path.basename(str(source_path)))[0],
+    ]
+    for candidate in lookup_candidates:
+        if candidate in sample_process:
+            return sample_process[candidate]
+
+    process = my_prefixed_process_name(sample)
+    if process:
+        return process
+
+    process = my_prefixed_process_name(source_path)
+    if process:
+        return process
+
+    return ''
+
+
 def load_result_pair(encryption_path, tc_path):
     encryption_df = pd.read_csv(encryption_path)
     encryption_df = encryption_df.rename(columns={'predict': 'enc_predict'})
@@ -128,7 +161,7 @@ def main():
         )
 
         if label == 'ransomware':
-            df = df[df.apply(lambda row: row['Process'] == sample_process.get(row['Sample'], ''), axis=1)]
+            df = df[df.apply(lambda row: row['Process'] == resolve_malicious_process(row['Sample']), axis=1)]
 
         grouped_df = summarize_group_level_detection(df)
         total = len(grouped_df)

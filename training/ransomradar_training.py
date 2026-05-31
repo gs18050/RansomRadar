@@ -124,8 +124,10 @@ def my_prefixed_process_name(value: str) -> str:
 
 def resolve_malicious_process(sample: str, sample_process: Dict[str, str], source_path: str = "") -> str:
     sample = str(sample)
-    if sample in sample_process:
-        return sample_process[sample]
+    lookup_candidates = [sample, Path(sample).stem, Path(str(source_path)).stem]
+    for candidate in lookup_candidates:
+        if candidate in sample_process:
+            return sample_process[candidate]
 
     process = my_prefixed_process_name(sample)
     if process:

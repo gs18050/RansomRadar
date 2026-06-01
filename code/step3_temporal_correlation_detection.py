@@ -41,7 +41,11 @@ for i in range(10):
 
 
 def merge_dfs(dir):
-    all_dfs = [pd.read_csv(os.path.join(dir, f), index_col=0) for f in os.listdir(dir)]
+    files = [
+        f for f in os.listdir(dir)
+        if os.path.isfile(os.path.join(dir, f)) and f.lower().endswith('.csv')
+    ]
+    all_dfs = [pd.read_csv(os.path.join(dir, f), index_col=0) for f in files]
     merged_df = pd.concat(all_dfs, ignore_index=True)
     merged_df.reset_index(drop=True, inplace=True)
     return merged_df

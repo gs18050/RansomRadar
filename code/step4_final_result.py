@@ -81,10 +81,10 @@ def discover_baseline_result_pairs():
     for root, _, files in os.walk(BACKGROUND_BASELINE_PATH):
         file_set = set(files)
         if 'encryption_detection_result_benign.csv' in file_set and 'tc_detection_result_benign.csv' in file_set:
-            pairs.append((
-                f'{root}\\encryption_detection_result_benign.csv',
-                f'{root}\\tc_detection_result_benign.csv',
-            ))
+            encryption_path = f'{root}\\encryption_detection_result_benign.csv'
+            tc_path = f'{root}\\tc_detection_result_benign.csv'
+            if os.path.isfile(encryption_path) and os.path.isfile(tc_path):
+                pairs.append((encryption_path, tc_path))
     return sorted(pairs)
 
 

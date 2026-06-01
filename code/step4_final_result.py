@@ -133,6 +133,15 @@ def format_rate(detected, total):
     return round(detected / total * 100, 2)
 
 
+def binary_metrics_from_counts(tn, fp, fn, tp):
+    total = tn + fp + fn + tp
+    accuracy = (tp + tn) / total if total else 0.0
+    precision = tp / (tp + fp) if (tp + fp) else 0.0
+    recall = tp / (tp + fn) if (tp + fn) else 0.0
+    f1 = 2 * precision * recall / (precision + recall) if (precision + recall) else 0.0
+    return accuracy, precision, recall, f1
+
+
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -153,6 +162,7 @@ def main():
     background_process_union, valid_baseline_runs = build_background_process_union()
     print(f'background baseline runs loaded: {valid_baseline_runs}')
     print(f'background process union size: {len(background_process_union)}')
+    metric_parts = {}
 
     for label in ['benign', 'ransomware']:
         df = load_result_pair(
@@ -166,6 +176,10 @@ def main():
         grouped_df = summarize_group_level_detection(df)
         total = len(grouped_df)
         cnt_detected = int(grouped_df['detected'].sum())
+        metric_parts[label] = {
+            'total': total,
+            'detected': cnt_detected,
+        }
 
         if label == 'benign':
             print(f'benign, original false positive rate: {format_rate(cnt_detected, total)}% ({cnt_detected}/{total})')
@@ -245,6 +259,24 @@ def main():
                     else:
                         for _, row in not_caught_df.iterrows():
                             print(f"  {row['Sample']} | {row['Process']}")
+
+    benign_total = metric_parts.get('benign', {}).get('total', 0)
+    benign_detected = metric_parts.get('benign', {}).get('detected', 0)
+    ransomware_total = metric_parts.get('ransomware', {}).get('total', 0)
+    ransomware_detected = metric_parts.get('ransomware', {}).get('detected', 0)
+    tn = benign_total - benign_detected
+    fp = benign_detected
+    tp = ransomware_detected
+    fn = ransomware_total - ransomware_detected
+    accuracy, precision, recall, f1 = binary_metrics_from_counts(tn, fp, fn, tp)
+    print(
+        'final process metrics: '
+        f'accuracy={accuracy:.4f} '
+        f'precision={precision:.4f} '
+        f'recall={recall:.4f} '
+        f'f1={f1:.4f} '
+        f'confusion_matrix=[[{tn}, {fp}], [{fn}, {tp}]]'
+    )
 
 
 if __name__ == '__main__':

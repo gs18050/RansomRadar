@@ -77,7 +77,8 @@ Expected data layout:
 If `--legacy-run-name` is provided, both legacy and new models are loaded from
 `training_runs/<run>/fold_*` and use each fold's saved `metrics.json` selected
 LSTM threshold. If `--legacy-run-name` is omitted, the shipped `models/`
-artifact is used for the legacy model with LSTM threshold `0.5`.
+artifact is used for the legacy model and the LSTM decision matches
+`step3_temporal_correlation_detection.py`: `argmax(logits)`.
 
 Use `--cross-only` to run only `legacy_model on new_data` and
 `new_model on legacy_data`.

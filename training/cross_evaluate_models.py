@@ -360,7 +360,14 @@ def prepare_lstm_arrays(
         "model_input_size": int(model_input_size),
         "mode": "none",
     }
-    if scaler_feature_size < model_input_size:
+    if scaler_feature_size == 10 and model_input_size == 11:
+        # Original step1 generated query_information between delete and filesize.
+        # Some shipped artifacts scale 10-feature rows but keep an 11-input LSTM,
+        # so insert the missing query_information channel as zero at its original position.
+        x = np.insert(x, 4, 0.0, axis=2)
+        adapter["mode"] = "insert_zero_query_information"
+        adapter["inserted_feature_index"] = 4
+    elif scaler_feature_size < model_input_size:
         pad_width = model_input_size - scaler_feature_size
         x = np.pad(x, ((0, 0), (0, 0), (0, pad_width)), mode="constant")
         adapter["mode"] = "zero_pad"
@@ -379,27 +386,51 @@ def predict_knn(df: pd.DataFrame, clf, scaler) -> pd.DataFrame:
     return out
 
 
-def predict_lstm_scores(model: LSTMModel, x: np.ndarray) -> np.ndarray:
+def predict_lstm_outputs(model: LSTMModel, x: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    logits_list: List[np.ndarray] = []
     scores: List[np.ndarray] = []
+    argmax_preds: List[np.ndarray] = []
     batch_size = 2048
     with torch.no_grad():
         for start in range(0, len(x), batch_size):
             batch = torch.tensor(x[start : start + batch_size], dtype=torch.float32)
             logits = model(batch)
             probs = torch.softmax(logits, dim=1)[:, 1]
+            logits_list.append(logits.cpu().numpy())
             scores.append(probs.cpu().numpy())
-    return np.concatenate(scores) if scores else np.array([], dtype=np.float32)
+            argmax_preds.append(torch.argmax(logits, dim=1).cpu().numpy().astype(np.int64))
+    if not scores:
+        return (
+            np.empty((0, 2), dtype=np.float32),
+            np.array([], dtype=np.float32),
+            np.array([], dtype=np.int64),
+        )
+    return np.concatenate(logits_list), np.concatenate(scores), np.concatenate(argmax_preds)
 
 
-def build_lstm_prediction(df: pd.DataFrame, scores: np.ndarray, threshold: float) -> pd.DataFrame:
+def build_lstm_prediction(
+    df: pd.DataFrame,
+    logits: np.ndarray,
+    scores: np.ndarray,
+    argmax_preds: np.ndarray,
+    threshold: float,
+    decision_mode: str,
+) -> pd.DataFrame:
     out = df[["source_path", "label_name", "label", "sample", "process", "Second"]].copy()
     out = out.rename(columns={"sample": "Sample", "process": "Process"})
+    out["tc_logit_0"] = logits[:, 0] if len(logits) else []
+    out["tc_logit_1"] = logits[:, 1] if len(logits) else []
     out["tc_score"] = scores
-    out["tc_predict"] = (out["tc_score"] >= threshold).astype(int)
+    if decision_mode == "argmax":
+        out["tc_predict"] = argmax_preds.astype(int)
+    elif decision_mode == "threshold":
+        out["tc_predict"] = (out["tc_score"] >= threshold).astype(int)
+    else:
+        raise ValueError(f"unsupported LSTM decision_mode={decision_mode!r}")
     return out
 
 
-def load_model_bundle(model_dir: Path, threshold: float) -> Dict[str, object]:
+def load_model_bundle(model_dir: Path, threshold: float, decision_mode: str = "threshold") -> Dict[str, object]:
     knn_clf = joblib.load(model_dir / "encryption_detection_clf.joblib")
     knn_scaler = joblib.load(model_dir / "encryption_detection_scaler.joblib")
     lstm_model, lstm_architecture = load_lstm_model(model_dir / "tc_detection_clf.pth")
@@ -412,6 +443,7 @@ def load_model_bundle(model_dir: Path, threshold: float) -> Dict[str, object]:
         "lstm_scaler": lstm_scaler,
         "lstm_architecture": lstm_architecture,
         "threshold": float(threshold),
+        "decision_mode": decision_mode,
     }
 
 
@@ -444,8 +476,15 @@ def evaluate_bundle(
         scaler_feature_size,
         model_input_size,
     )
-    lstm_scores = predict_lstm_scores(bundle["lstm_model"], x_lstm)
-    lstm_pred = build_lstm_prediction(lstm_df, lstm_scores, float(bundle["threshold"]))
+    lstm_logits, lstm_scores, lstm_argmax_preds = predict_lstm_outputs(bundle["lstm_model"], x_lstm)
+    lstm_pred = build_lstm_prediction(
+        lstm_df,
+        lstm_logits,
+        lstm_scores,
+        lstm_argmax_preds,
+        float(bundle["threshold"]),
+        str(bundle["decision_mode"]),
+    )
     final_pred, final_counts = final_step4_predictions(knn_pred, lstm_pred, sample_process)
 
     metrics = {
@@ -453,6 +492,7 @@ def evaluate_bundle(
         "lstm_architecture": bundle["lstm_architecture"],
         "lstm_input_adapter": lstm_input_adapter,
         "lstm_threshold": float(bundle["threshold"]),
+        "lstm_decision_mode": str(bundle["decision_mode"]),
         "sample_count": len(records),
         "label_counts": {
             str(label): int(sum(1 for record in records if record.label == label))
@@ -543,7 +583,7 @@ def evaluate_training_run(
         if not fold_dir.is_dir():
             continue
         threshold = new_fold_threshold(fold_dir)
-        bundle = load_model_bundle(fold_dir, threshold=threshold)
+        bundle = load_model_bundle(fold_dir, threshold=threshold, decision_mode="threshold")
         metrics = evaluate_bundle(
             bundle,
             records,
@@ -633,8 +673,9 @@ def main() -> int:
             "legacy_lstm_dir_name": args.legacy_lstm_dir_name,
             "new_lstm_dir_name": args.new_lstm_dir_name,
             "legacy_model_lstm_threshold": (
-                "fold metrics.json lstm_training.selected_threshold" if legacy_run_dir is not None else 0.5
+                "fold metrics.json lstm_training.selected_threshold" if legacy_run_dir is not None else None
             ),
+            "legacy_model_lstm_decision_mode": "threshold" if legacy_run_dir is not None else "argmax",
             "new_model_lstm_threshold_source": "fold metrics.json lstm_training.selected_threshold",
             "cross_only": args.cross_only,
             "dataset_sample_counts": {name: len(records) for name, records in datasets.items()},
@@ -665,7 +706,7 @@ def main() -> int:
                 args.save_predictions,
             )
         else:
-            legacy_bundle = load_model_bundle(legacy_model_dir, threshold=0.5)
+            legacy_bundle = load_model_bundle(legacy_model_dir, threshold=0.5, decision_mode="argmax")
             metrics = evaluate_bundle(
                 legacy_bundle,
                 records,

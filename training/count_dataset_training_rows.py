@@ -172,55 +172,94 @@ def summarize_counts(total_rows: int, label_counts: Dict[str, int]) -> Dict[str,
     }
 
 
+def process_stats(processes: Sequence[str]) -> Dict[str, object]:
+    normalized = [str(process).strip().lower() for process in processes if str(process).strip()]
+    unique = sorted(set(normalized))
+    return {
+        "unique_count": len(unique),
+        "unique_processes": unique,
+    }
+
+
+def summarize_per_file_unique_counts(per_file: Sequence[Dict[str, object]], key: str) -> Dict[str, object]:
+    counts = [int(item.get(key, 0)) for item in per_file]
+    return {
+        "min": int(min(counts)) if counts else 0,
+        "max": int(max(counts)) if counts else 0,
+        "mean": float(np.mean(counts)) if counts else 0.0,
+        "median": float(np.median(counts)) if counts else 0.0,
+    }
+
+
 def count_knn_rows(records: Sequence[SampleRecord], sample_process: Dict[str, str]) -> Dict[str, object]:
     labels = []
+    benign_processes: List[str] = []
     per_file = []
     for record in records:
         df = read_feature_csv(record.one_s_path, KNN_FEATURES + ["Sample", "Process", "Second"])
         if df.empty:
             file_counts: Dict[str, int] = {}
+            file_benign_processes: List[str] = []
         else:
             file_labels = assign_process_labels(df, record, sample_process, "Sample", "Process")
             labels.append(file_labels)
             file_counts = label_counts_dict(file_labels)
+            file_benign_processes = df.loc[file_labels == 0, "Process"].astype(str).tolist()
+            benign_processes.extend(file_benign_processes)
         per_file.append(
             {
                 "source_path": record.rel_path,
                 "label_name": record.label_name,
                 "row_count": int(len(df)),
                 "label_counts": file_counts,
+                "unique_benign_process_count": process_stats(file_benign_processes)["unique_count"],
             }
         )
 
     all_labels = pd.concat(labels, ignore_index=True) if labels else pd.Series(dtype=np.int64)
     summary = summarize_counts(len(all_labels), label_counts_dict(all_labels))
+    summary["benign_processes"] = process_stats(benign_processes)
+    summary["per_file_unique_benign_process_count"] = summarize_per_file_unique_counts(
+        per_file,
+        "unique_benign_process_count",
+    )
     summary["per_file"] = per_file
     return summary
 
 
 def count_lstm_rows(records: Sequence[SampleRecord], sample_process: Dict[str, str]) -> Dict[str, object]:
     labels = []
+    benign_processes: List[str] = []
     per_file = []
     required = LSTM_FEATURES + ["sample", "process", "starttime"]
     for record in records:
         df = read_feature_csv(record.lstm_path, required)
         if df.empty:
             file_counts = {}
+            file_benign_processes = []
         else:
             file_labels = assign_process_labels(df, record, sample_process, "sample", "process")
             labels.append(file_labels)
             file_counts = label_counts_dict(file_labels)
+            file_benign_processes = df.loc[file_labels == 0, "process"].astype(str).tolist()
+            benign_processes.extend(file_benign_processes)
         per_file.append(
             {
                 "source_path": record.rel_path,
                 "label_name": record.label_name,
                 "row_count": int(len(df)),
                 "label_counts": file_counts,
+                "unique_benign_process_count": process_stats(file_benign_processes)["unique_count"],
             }
         )
 
     all_labels = pd.concat(labels, ignore_index=True) if labels else pd.Series(dtype=np.int64)
     summary = summarize_counts(len(all_labels), label_counts_dict(all_labels))
+    summary["benign_processes"] = process_stats(benign_processes)
+    summary["per_file_unique_benign_process_count"] = summarize_per_file_unique_counts(
+        per_file,
+        "unique_benign_process_count",
+    )
     summary["per_file"] = per_file
     return summary
 
@@ -260,7 +299,14 @@ def print_dataset_summary(dataset_name: str, summary: Dict[str, object]) -> None
             f"  {feature_name}: total={item['total_rows']} "
             f"negative={item['negative_rows']} positive={item['positive_rows']} "
             f"positive_ratio={item['positive_ratio']:.6f} "
-            f"negative_positive_ratio={ratio_text}"
+            f"negative_positive_ratio={ratio_text} "
+            f"unique_benign_processes={item['benign_processes']['unique_count']}"
+        )
+        per_file_stats = item["per_file_unique_benign_process_count"]
+        print(
+            f"    per_file_unique_benign_process_count: "
+            f"min={per_file_stats['min']} max={per_file_stats['max']} "
+            f"mean={per_file_stats['mean']:.2f} median={per_file_stats['median']:.2f}"
         )
 
 

@@ -154,11 +154,26 @@ def parse_args():
         action='store_true',
         help='Print ransomware samples that were not caught in step4 evaluation.',
     )
+    parser.add_argument(
+        '--use-legacy-features',
+        action='store_true',
+        help='Compatibility flag for running step2-step4 with legacy features. Step4 reads step2/step3 result CSVs.',
+    )
+    parser.add_argument(
+        '--legacy-subdir',
+        default='legacy',
+        help='Legacy feature subdirectory name. Accepted for CLI compatibility with step2/step3. Default: legacy.',
+    )
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
+    if args.use_legacy_features:
+        print(
+            'using legacy feature mode: step4 reads the result CSVs produced by step2/step3; '
+            f'assuming they were generated from legacy subdir "{args.legacy_subdir}".'
+        )
     background_process_union, valid_baseline_runs = build_background_process_union()
     print(f'background baseline runs loaded: {valid_baseline_runs}')
     print(f'background process union size: {len(background_process_union)}')

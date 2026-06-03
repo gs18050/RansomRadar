@@ -1,3 +1,4 @@
+import argparse
 import pandas as pd
 from read_hpc_file import read_hpc_file
 from read_irp_file import read_irp_file
@@ -51,6 +52,28 @@ def merge_dfs(dir):
     return merged_df
 
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '--use-legacy-features',
+        action='store_true',
+        help='Read feature CSVs from the legacy subdirectory under each label directory.',
+    )
+    parser.add_argument(
+        '--legacy-subdir',
+        default='legacy',
+        help='Legacy feature subdirectory name. Default: legacy.',
+    )
+    return parser.parse_args()
+
+
+def feature_dir(label, args):
+    base_dir = f'{FEATURE_PATH}\\lstm\\{label}'
+    if args.use_legacy_features:
+        return f'{base_dir}\\{args.legacy_subdir}'
+    return base_dir
+
+
 class MyDataset(Dataset):
     def __init__(self, data, labels):
         self.data = data
@@ -89,6 +112,7 @@ def print_score_stats(label, feature_df):
 
 
 def main():
+    args = parse_args()
     scaler = load(f'{MODEL_PATH}\\tc_detection_scaler.joblib')
 
     clf = LSTMModel(input_size=11, hidden_size=50, num_layers=1, num_classes=2)
@@ -98,7 +122,7 @@ def main():
     all_result_dfs = []
 
     for label in ['benign', 'ransomware']:
-        feature_df = merge_dfs(f'{FEATURE_PATH}\\lstm\\{label}')
+        feature_df = merge_dfs(feature_dir(label, args))
 
         X = feature_df[features].values
         # normalized

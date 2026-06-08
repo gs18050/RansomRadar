@@ -12,7 +12,17 @@ def read_irp_file(filepath):
         dtype=str,
     )
 
-    required_cols = ['time', 'major_opr', 'file_name', 'is_rename', 'is_delete', 'file_size']
+    required_cols = [
+        'time',
+        'major_opr',
+        'file_name',
+        'is_rename',
+        'is_delete',
+        'file_size',
+        'buffer_length',
+        'entropy_byte_based',
+        'entropy_bit_based',
+    ]
     for col in required_cols:
         if col not in df.columns:
             df[col] = pd.NA
@@ -22,7 +32,9 @@ def read_irp_file(filepath):
     df['file_name'] = df['file_name'].fillna('').astype(str)
 
     # Coerce numeric fields; rows with invalid time cannot be used and are ignored.
-    for col in ['time', 'is_rename', 'is_delete', 'file_size']:
+    for col in ['time', 'is_rename', 'is_delete', 'file_size', 'buffer_length']:
+        df[col] = pd.to_numeric(df[col], errors='coerce')
+    for col in ['entropy_byte_based', 'entropy_bit_based']:
         df[col] = pd.to_numeric(df[col], errors='coerce')
 
     df = df[df['time'].notna()].copy()
@@ -30,6 +42,9 @@ def read_irp_file(filepath):
     df['is_rename'] = df['is_rename'].fillna(0).astype('int64')
     df['is_delete'] = df['is_delete'].fillna(0).astype('int64')
     df['file_size'] = df['file_size'].fillna(0).astype('int64')
+    df['buffer_length'] = df['buffer_length'].fillna(0).astype('int64')
+    df['entropy_byte_based'] = df['entropy_byte_based'].fillna(0.0).astype('float64')
+    df['entropy_bit_based'] = df['entropy_bit_based'].fillna(0.0).astype('float64')
 
     df['is_read'] = (df['major_opr'] == 'IRP_MJ_READ').astype(int)
     df['is_write'] = (df['major_opr'] == 'IRP_MJ_WRITE').astype(int)

@@ -52,6 +52,21 @@ LSTM_STEP_FEATURES_11 = [
     "llcmisses",
 ]
 
+LSTM_STEP_FEATURES_12 = [
+    "read",
+    "write",
+    "rename",
+    "delete",
+    "filesize",
+    "instructions",
+    "branchinstructions",
+    "branchmispredicts",
+    "llcrefs",
+    "llcmisses",
+    "write_entropy_byte_weighted_avg",
+    "write_entropy_byte_max",
+]
+
 LSTM_STEPS = 10
 
 
@@ -124,8 +139,10 @@ def lstm_features(input_size: int) -> List[str]:
         steps = LSTM_STEP_FEATURES_10
     elif input_size == 11:
         steps = LSTM_STEP_FEATURES_11
+    elif input_size == 12:
+        steps = LSTM_STEP_FEATURES_12
     else:
-        raise ValueError(f"unsupported LSTM input_size={input_size}; expected 10 or 11")
+        raise ValueError(f"unsupported LSTM input_size={input_size}; expected 10, 11, or 12")
     return [f"{name}_{i}" for i in range(LSTM_STEPS) for name in steps]
 
 
@@ -342,8 +359,8 @@ def scaler_input_size(scaler) -> int:
     if feature_count % LSTM_STEPS != 0:
         raise RuntimeError(f"LSTM scaler feature count must be divisible by {LSTM_STEPS}: {feature_count}")
     input_size = feature_count // LSTM_STEPS
-    if input_size not in {10, 11}:
-        raise RuntimeError(f"unsupported LSTM scaler input size={input_size}; expected 10 or 11")
+    if input_size not in {10, 11, 12}:
+        raise RuntimeError(f"unsupported LSTM scaler input size={input_size}; expected 10, 11, or 12")
     return input_size
 
 
@@ -521,6 +538,14 @@ def write_json(path: Path, data: object) -> None:
         f.write("\n")
 
 
+def read_run_config(run_dir: Path) -> Dict[str, object]:
+    config_path = run_dir / "config.json"
+    if not config_path.exists():
+        return {}
+    with config_path.open("r", encoding="utf-8") as f:
+        return json.load(f)
+
+
 def record_to_json(record: SampleRecord) -> Dict[str, object]:
     data = asdict(record)
     data["one_s_path"] = str(data["one_s_path"])
@@ -623,8 +648,16 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument("--new-run-name", required=True)
-    parser.add_argument("--new-lstm-dir-name", default="lstm_process_filtered")
-    parser.add_argument("--legacy-lstm-dir-name", default="lstm")
+    parser.add_argument(
+        "--new-lstm-dir-name",
+        default=None,
+        help="LSTM feature directory for new_data. Default: new run config lstm_dir_name, then lstm_process_filtered.",
+    )
+    parser.add_argument(
+        "--legacy-lstm-dir-name",
+        default=None,
+        help="LSTM feature directory for legacy_data. Default: legacy run config lstm_dir_name if provided, otherwise lstm.",
+    )
     parser.add_argument("--output-dir", default=str(repo_root() / "cross_eval_runs"))
     parser.add_argument("--run-name", default=None)
     parser.add_argument(
@@ -653,6 +686,13 @@ def main() -> int:
         raise RuntimeError(f"legacy model directory does not exist: {legacy_model_dir}")
     if not new_run_dir.exists():
         raise RuntimeError(f"new training run directory does not exist: {new_run_dir}")
+
+    new_run_config = read_run_config(new_run_dir)
+    legacy_run_config = read_run_config(legacy_run_dir) if legacy_run_dir is not None else {}
+    if args.new_lstm_dir_name is None:
+        args.new_lstm_dir_name = str(new_run_config.get("lstm_dir_name", "lstm_process_filtered"))
+    if args.legacy_lstm_dir_name is None:
+        args.legacy_lstm_dir_name = str(legacy_run_config.get("lstm_dir_name", "lstm"))
 
     sample_process = load_sample_process_map(root)
     datasets = {

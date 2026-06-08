@@ -40,7 +40,7 @@ KNN_FEATURES = [
     "std_llcmissrate",
 ]
 
-LSTM_STEP_FEATURES = [
+BASE_LSTM_STEP_FEATURES = [
     "read",
     "write",
     "rename",
@@ -52,7 +52,12 @@ LSTM_STEP_FEATURES = [
     "llcrefs",
     "llcmisses",
 ]
+WRITE_ENTROPY_LSTM_STEP_FEATURES = [
+    "write_entropy_byte_weighted_avg",
+    "write_entropy_byte_max",
+]
 LSTM_STEPS = 10
+LSTM_STEP_FEATURES = list(BASE_LSTM_STEP_FEATURES)
 LSTM_FEATURES = [f"{name}_{i}" for i in range(LSTM_STEPS) for name in LSTM_STEP_FEATURES]
 
 
@@ -783,11 +788,20 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--features-root", default=str(repo_root() / "features"))
     parser.add_argument(
         "--lstm-dir-name",
-        default="lstm_process_filtered",
+        default=None,
         help=(
             "LSTM feature directory name under features root. Default expects output from "
             "code/step1_5_filter_lstm_ransomware_process.py. Use --lstm-dir-name lstm "
-            "to train with the unfiltered original LSTM features."
+            "to train with the unfiltered original LSTM features. If --use-write-entropy-features "
+            "is set, the default becomes lstm_entropy_process_filtered."
+        ),
+    )
+    parser.add_argument(
+        "--use-write-entropy-features",
+        action="store_true",
+        help=(
+            "Use LSTM features with write_entropy_byte_weighted_avg_i and write_entropy_byte_max_i. "
+            "By default this reads features/lstm_entropy_process_filtered."
         ),
     )
     parser.add_argument("--output-dir", default=str(repo_root() / "training_runs"))
@@ -832,6 +846,15 @@ def choose_device(name: str) -> torch.device:
 
 def main() -> int:
     args = parse_args()
+    global LSTM_STEP_FEATURES, LSTM_FEATURES
+    LSTM_STEP_FEATURES = list(BASE_LSTM_STEP_FEATURES)
+    if args.use_write_entropy_features:
+        LSTM_STEP_FEATURES.extend(WRITE_ENTROPY_LSTM_STEP_FEATURES)
+    LSTM_FEATURES = [f"{name}_{i}" for i in range(LSTM_STEPS) for name in LSTM_STEP_FEATURES]
+
+    if args.lstm_dir_name is None:
+        args.lstm_dir_name = "lstm_entropy_process_filtered" if args.use_write_entropy_features else "lstm_process_filtered"
+
     if args.lstm_train_negative_positive_ratio is not None and args.lstm_train_negative_positive_ratio <= 0:
         raise ValueError("--lstm-train-negative-positive-ratio must be greater than 0")
 
@@ -885,7 +908,10 @@ def main() -> int:
             "knn_smote_sampling_strategy": "auto",
             "device": str(device),
             "knn_features": KNN_FEATURES,
+            "use_write_entropy_features": bool(args.use_write_entropy_features),
+            "write_entropy_lstm_step_features": WRITE_ENTROPY_LSTM_STEP_FEATURES,
             "lstm_step_features": LSTM_STEP_FEATURES,
+            "lstm_feature_columns": LSTM_FEATURES,
             "lstm_input_size": len(LSTM_STEP_FEATURES),
             "paired_sample_count": len(records),
             "paired_label_counts": label_counts,
@@ -980,6 +1006,9 @@ def main() -> int:
             "fold": fold_idx,
             "train_sample_count": len(train_records),
             "test_sample_count": len(test_records),
+            "use_write_entropy_features": bool(args.use_write_entropy_features),
+            "lstm_step_features": LSTM_STEP_FEATURES,
+            "lstm_input_size": len(LSTM_STEP_FEATURES),
             "knn_train_label_counts": {
                 str(k): int(v) for k, v in knn_train_df["label"].value_counts().sort_index().items()
             },

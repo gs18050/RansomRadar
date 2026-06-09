@@ -14,6 +14,32 @@ WRITE_ENTROPY_FEATURES = [
     'write_entropy_byte_max',
 ]
 
+HPC_COUNTER_COLUMNS = [
+    'InstructionsRetiredFixed',
+    'BranchInstructionRetired',
+    'BranchMispredictsRetired',
+    'LLCReference',
+    'LLCMisses',
+]
+
+
+def aggregate_hpc_counters(df, group_cols):
+    result = (
+        df.groupby(group_cols + ['Counter'], sort=False)
+        .size()
+        .unstack(fill_value=0)
+        .reset_index()
+    )
+    result.columns.name = None
+    for col in HPC_COUNTER_COLUMNS:
+        if col not in result.columns:
+            result[col] = 0
+    return result
+
+
+def population_std(values):
+    return float(np.asarray(values, dtype=np.float64).std(ddof=0))
+
 
 # calculate features for every second
 def calculate_1s_feature(filepath, targetpath):  
@@ -23,76 +49,42 @@ def calculate_1s_feature(filepath, targetpath):
         return
 
     df = read_hpc_file(filepath)
+    if df is None or df.empty:
+        return
 
-    result_df = pd.DataFrame(columns=[
-        'Sample',
-        'Process',
-        'Second',
-        'avg_branchinstructionrate',
-        'std_branchinstructionrate',
-        'avg_branchmispredictsrate',
-        'std_branchmispredictsrate',
-        'avg_llcrefrate',
-        'std_llcrefrate',
-        'avg_llcmissrate',
-        'std_llcmissrate',
-    ])
-
-    counter_one_hot = pd.get_dummies(df['Counter'])
-    df = pd.concat([df, counter_one_hot], axis=1)
     df['Timestamp'] = df['Timestamp'].astype(np.float64)
     df['Second'] = (df['Timestamp'] / 10000000).astype(np.int64)
     df['100ms'] = (df['Timestamp'] / 1000000).astype(np.int64)
-    sample = df['Sample'].iloc[0]
 
-    for process, process_df in df.groupby('Process'):
-        for second, second_df in process_df.groupby('Second'):
-            branchinstructionrate_lst = []
-            branchmispredictsrate_lst = []
-            llcrefrate_lst = []
-            llcmissrate_lst = []
-            instruction_lst = []
-            branchinstruction_lst = []
-            llcref_lst = []
-            cnt = 0
+    ms100_df = aggregate_hpc_counters(df, ['Sample', 'Process', 'Second', '100ms'])
+    ms100_df = ms100_df[
+        (ms100_df['InstructionsRetiredFixed'] != 0)
+        & (ms100_df['BranchInstructionRetired'] != 0)
+        & (ms100_df['LLCReference'] != 0)
+    ].copy()
+    if ms100_df.empty:
+        return
 
-            for _, sub_df in second_df.groupby('100ms'):
-                try:
-                    instructions = sub_df['InstructionsRetiredFixed'].sum()
-                    branchinstructions = sub_df['BranchInstructionRetired'].sum()
-                    branchmispredicts = sub_df['BranchMispredictsRetired'].sum()
-                    llcrefs = sub_df['LLCReference'].sum()
-                    llcmisses = sub_df['LLCMisses'].sum()
-                    if instructions == 0 or branchinstructions == 0 or llcrefs == 0:
-                        continue
-                    branchinstructionrate_lst.append(branchinstructions / instructions)
-                    branchmispredictsrate_lst.append(branchmispredicts / branchinstructions)
-                    llcrefrate_lst.append(llcrefs / instructions)
-                    llcmissrate_lst.append(llcmisses / llcrefs)
-                    instruction_lst.append(instructions)
-                    branchinstruction_lst.append(branchinstructions)
-                    llcref_lst.append(llcrefs)
-                    cnt += 1
-                except:
-                    pass
+    ms100_df['branchinstructionrate'] = ms100_df['BranchInstructionRetired'] / ms100_df['InstructionsRetiredFixed']
+    ms100_df['branchmispredictsrate'] = ms100_df['BranchMispredictsRetired'] / ms100_df['BranchInstructionRetired']
+    ms100_df['llcrefrate'] = ms100_df['LLCReference'] / ms100_df['InstructionsRetiredFixed']
+    ms100_df['llcmissrate'] = ms100_df['LLCMisses'] / ms100_df['LLCReference']
 
-            if cnt == 0:
-                continue
+    result_df = (
+        ms100_df.groupby(['Sample', 'Process', 'Second'], sort=False, as_index=False)
+        .agg(
+            avg_branchinstructionrate=('branchinstructionrate', 'mean'),
+            std_branchinstructionrate=('branchinstructionrate', population_std),
+            avg_branchmispredictsrate=('branchmispredictsrate', 'mean'),
+            std_branchmispredictsrate=('branchmispredictsrate', population_std),
+            avg_llcrefrate=('llcrefrate', 'mean'),
+            std_llcrefrate=('llcrefrate', population_std),
+            avg_llcmissrate=('llcmissrate', 'mean'),
+            std_llcmissrate=('llcmissrate', population_std),
+        )
+    )
 
-            result_df.loc[len(result_df)] = {
-                'Sample': sample,
-                'Process': process,
-                'Second': second,
-                'avg_branchinstructionrate': np.mean(branchinstructionrate_lst),
-                'std_branchinstructionrate': np.std(branchinstructionrate_lst),
-                'avg_branchmispredictsrate': np.mean(branchmispredictsrate_lst),
-                'std_branchmispredictsrate': np.std(branchmispredictsrate_lst),
-                'avg_llcrefrate': np.mean(llcrefrate_lst),
-                'std_llcrefrate': np.std(llcrefrate_lst),
-                'avg_llcmissrate': np.mean(llcmissrate_lst),
-                'std_llcmissrate': np.std(llcmissrate_lst),
-            } 
-
+    os.makedirs(os.path.dirname(targetpath), exist_ok=True)
     result_df.to_csv(targetpath)
 
 
@@ -104,38 +96,38 @@ def calculate_100ms_feature(filepath, targetpath):
         return
     
     df = read_hpc_file(filepath)
+    if df is None or df.empty:
+        return
 
-    result_df = pd.DataFrame(columns=[
-        'Sample',
-        'Process',
-        'fromtime',
-        'totime',
-        'instructions',
-        'branchinstructions',
-        'branchmispredicts',
-        'llcreferences',
-        'llcmisses'
-    ])
-
-    counter_one_hot = pd.get_dummies(df['Counter'])
-    df = pd.concat([df, counter_one_hot], axis=1)
     df['100ms'] = (df['Timestamp'] / 1000000).astype(np.int64)
-    sample = df['Sample'].iloc[0]
 
-    for process, process_df in df.groupby('Process'):
-        for ms100, ms100_df in process_df.groupby('100ms'):
-            result_df.loc[len(result_df)] = {
-                'Sample': sample,
-                'Process': process,
-                'fromtime': ms100 * 1000000,
-                'totime': (ms100+1) * 1000000,
-                'instructions': ms100_df['InstructionsRetiredFixed'].sum(),
-                'branchinstructions': ms100_df['BranchInstructionRetired'].sum(),
-                'branchmispredicts': ms100_df['BranchMispredictsRetired'].sum(),
-                'llcreferences': ms100_df['LLCReference'].sum(),
-                'llcmisses': ms100_df['LLCMisses'].sum()
-            }
+    result_df = aggregate_hpc_counters(df, ['Sample', 'Process', '100ms'])
+    result_df['fromtime'] = result_df['100ms'] * 1000000
+    result_df['totime'] = (result_df['100ms'] + 1) * 1000000
+    result_df = result_df.rename(
+        columns={
+            'InstructionsRetiredFixed': 'instructions',
+            'BranchInstructionRetired': 'branchinstructions',
+            'BranchMispredictsRetired': 'branchmispredicts',
+            'LLCReference': 'llcreferences',
+            'LLCMisses': 'llcmisses',
+        }
+    )
+    result_df = result_df[
+        [
+            'Sample',
+            'Process',
+            'fromtime',
+            'totime',
+            'instructions',
+            'branchinstructions',
+            'branchmispredicts',
+            'llcreferences',
+            'llcmisses',
+        ]
+    ]
 
+    os.makedirs(os.path.dirname(targetpath), exist_ok=True)
     result_df.to_csv(targetpath)
 
 

@@ -22,7 +22,6 @@ namespace ConsoleApp2
     
             string sourceFileName = args[0];
             string targetFileName = args[1];
-            long delta = 504911232000000000L + 288000000000L;
 
             // check if sourceFile exists
             if (!File.Exists(sourceFileName))
@@ -36,14 +35,14 @@ namespace ConsoleApp2
                 using (StreamWriter writer = new StreamWriter(targetFileName))
                 {
                     var source = new ETWTraceEventSource(sourceFileName);
-                    writer.WriteLine(source.SessionStartTime.Ticks - delta);
-                    // Console.WriteLine(source.SessionStartTime.Ticks - delta);
+                    writer.WriteLine(source.SessionStartTime.ToUniversalTime().ToFileTimeUtc());
+                    // Console.WriteLine(source.SessionStartTime.ToUniversalTime().ToFileTimeUtc());
                     // var parser = new DynamicTraceEventParser(source); 
 
                     //var etlxFile = TraceLog.CreateFromEventTraceLogFile(sourceFileName);
                     //var traceLog = new TraceLog(etlxFile);
-                    //Console.WriteLine(traceLog.SessionStartTime.Ticks - delta);
-                    // writer.WriteLine(traceLog.SessionStartTime.Ticks - delta);
+                    //Console.WriteLine(traceLog.SessionStartTime.ToUniversalTime().ToFileTimeUtc());
+                    // writer.WriteLine(traceLog.SessionStartTime.ToUniversalTime().ToFileTimeUtc());
 
                 }
             }

@@ -15,7 +15,7 @@ def read_csv_any(path: Path, **kwargs):
     return pd.read_csv(path, on_bad_lines="skip", low_memory=False, **kwargs)
 
 
-def inspect_pair(irp_path: Path, hpc_path: Path):
+def inspect_pair(irp_path: Path, hpc_path: Path, hpc_time_offset_100ns: int = 0):
     result = {
         "sample": irp_path.stem,
         "irp_path": str(irp_path),
@@ -70,8 +70,8 @@ def inspect_pair(irp_path: Path, hpc_path: Path):
         result.update(status="bad_hpc", reason="no valid numeric HPC time rows")
         return result
 
-    hpc_min = float(hpc_from.min())
-    hpc_max = float(hpc_to.max())
+    hpc_min = float(hpc_from.min() + hpc_time_offset_100ns)
+    hpc_max = float(hpc_to.max() + hpc_time_offset_100ns)
     irp_min = float(irp_time.min())
     irp_max = float(irp_time.max())
 
@@ -107,7 +107,17 @@ def main():
     parser.add_argument("--features-root", default=FEATURE_PATH)
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--output", default=None)
+    parser.add_argument(
+        "--hpc-time-offset-seconds",
+        type=float,
+        default=0.0,
+        help=(
+            "Apply this offset to HPC feature times before overlap checks. "
+            "Use -3600 to test whether ETL start time is shifted one hour late."
+        ),
+    )
     args = parser.parse_args()
+    hpc_time_offset_100ns = int(args.hpc_time_offset_seconds * 10000000)
 
     labels = ["benign", "ransomware"] if args.label == "all" else [args.label]
     rows = []
@@ -118,7 +128,7 @@ def main():
         if args.limit is not None:
             paths = paths[: args.limit]
         for irp_path in paths:
-            row = inspect_pair(irp_path, hpc_dir / f"{irp_path.stem}.csv")
+            row = inspect_pair(irp_path, hpc_dir / f"{irp_path.stem}.csv", hpc_time_offset_100ns)
             row["label"] = label
             rows.append(row)
 

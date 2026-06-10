@@ -1,5 +1,4 @@
 from config import HPC_ROOT_path, IRP_ROOT_PATH, RAW_ROOT_PATH, FEATURE_PATH
-from read_hpc_file import read_hpc_file
 from read_irp_file import read_irp_file
 
 import argparse
@@ -23,6 +22,50 @@ HPC_COUNTER_COLUMNS = [
 ]
 
 
+def read_hpc_starttime(filepath):
+    sample = os.path.basename(filepath).split('.')[0]
+    dirname = os.path.dirname(filepath)
+    starttime_path = f'{dirname}/{sample}_starttime.txt'
+    if not os.path.exists(starttime_path):
+        return None
+    with open(starttime_path, 'r') as f:
+        return int(f.read().strip())
+
+
+def parse_hpc_timestamp_ms(series):
+    text = series.astype('string')
+    text = text.str.split('.', n=1).str[0].str.replace(',', '', regex=False)
+    return pd.to_numeric(text, errors='coerce')
+
+
+def iter_hpc_feature_chunks(filepath, chunksize):
+    starttime = read_hpc_starttime(filepath)
+    if starttime is None:
+        return
+
+    sample = os.path.basename(filepath).split('.')[0]
+    usecols = ['Timestamp (ms)', 'Counter', 'Process']
+    for chunk in pd.read_csv(
+        filepath,
+        usecols=lambda col: col in usecols,
+        on_bad_lines='skip',
+        chunksize=chunksize,
+        dtype={'Timestamp (ms)': 'string', 'Counter': 'string', 'Process': 'string'},
+    ):
+        if not set(usecols).issubset(chunk.columns):
+            continue
+        chunk = chunk.dropna(subset=usecols).copy()
+        if chunk.empty:
+            continue
+        relative_ms = parse_hpc_timestamp_ms(chunk['Timestamp (ms)'])
+        chunk = chunk[relative_ms.notna()].copy()
+        if chunk.empty:
+            continue
+        chunk['Timestamp'] = relative_ms.loc[chunk.index].astype(np.int64) * 10000 + starttime
+        chunk['Sample'] = sample
+        yield chunk[['Sample', 'Counter', 'Process', 'Timestamp']]
+
+
 def aggregate_hpc_counters(df, group_cols):
     result = (
         df.groupby(group_cols + ['Counter'], sort=False)
@@ -37,26 +80,38 @@ def aggregate_hpc_counters(df, group_cols):
     return result
 
 
+def aggregate_counter_columns(df, group_cols):
+    result = (
+        df.groupby(group_cols, sort=False, as_index=False)[HPC_COUNTER_COLUMNS]
+        .sum()
+    )
+    return result
+
+
 def population_std(values):
     return float(np.asarray(values, dtype=np.float64).std(ddof=0))
 
 
 # calculate features for every second
-def calculate_1s_feature(filepath, targetpath):  
+def calculate_1s_feature(filepath, targetpath, hpc_chunksize):  
     print(f'extract 1s feature for {targetpath}')
 
     if os.path.exists(targetpath):
         return
 
-    df = read_hpc_file(filepath)
-    if df is None or df.empty:
+    partials = []
+    for df in iter_hpc_feature_chunks(filepath, hpc_chunksize):
+        df['Second'] = (df['Timestamp'] / 10000000).astype(np.int64)
+        df['100ms'] = (df['Timestamp'] / 1000000).astype(np.int64)
+        partials.append(aggregate_hpc_counters(df, ['Sample', 'Process', 'Second', '100ms']))
+
+    if not partials:
         return
 
-    df['Timestamp'] = df['Timestamp'].astype(np.float64)
-    df['Second'] = (df['Timestamp'] / 10000000).astype(np.int64)
-    df['100ms'] = (df['Timestamp'] / 1000000).astype(np.int64)
-
-    ms100_df = aggregate_hpc_counters(df, ['Sample', 'Process', 'Second', '100ms'])
+    ms100_df = aggregate_counter_columns(
+        pd.concat(partials, ignore_index=True),
+        ['Sample', 'Process', 'Second', '100ms'],
+    )
     ms100_df = ms100_df[
         (ms100_df['InstructionsRetiredFixed'] != 0)
         & (ms100_df['BranchInstructionRetired'] != 0)
@@ -89,19 +144,24 @@ def calculate_1s_feature(filepath, targetpath):
 
 
 # calculate features for every 100ms
-def calculate_100ms_feature(filepath, targetpath):
+def calculate_100ms_feature(filepath, targetpath, hpc_chunksize):
     print(f'calculate 100ms feature for {targetpath}')
 
     if os.path.exists(targetpath):
         return
-    
-    df = read_hpc_file(filepath)
-    if df is None or df.empty:
+
+    partials = []
+    for df in iter_hpc_feature_chunks(filepath, hpc_chunksize):
+        df['100ms'] = (df['Timestamp'] / 1000000).astype(np.int64)
+        partials.append(aggregate_hpc_counters(df, ['Sample', 'Process', '100ms']))
+
+    if not partials:
         return
 
-    df['100ms'] = (df['Timestamp'] / 1000000).astype(np.int64)
-
-    result_df = aggregate_hpc_counters(df, ['Sample', 'Process', '100ms'])
+    result_df = aggregate_counter_columns(
+        pd.concat(partials, ignore_index=True),
+        ['Sample', 'Process', '100ms'],
+    )
     result_df['fromtime'] = result_df['100ms'] * 1000000
     result_df['totime'] = (result_df['100ms'] + 1) * 1000000
     result_df = result_df.rename(
@@ -240,6 +300,12 @@ def parse_args():
         action='store_true',
         help='Add write entropy LSTM features and write LSTM output to features/lstm_entropy.',
     )
+    parser.add_argument(
+        '--hpc-chunksize',
+        type=int,
+        default=500000,
+        help='Rows per chunk when reading raw HPC CSV files. Lower this if step1 still runs out of memory.',
+    )
     return parser.parse_args()
 
 
@@ -250,9 +316,17 @@ def main():
         for file in os.listdir(f'{RAW_ROOT_PATH}\\{label}'):
             sample = file.split('.')[0]
 
-            calculate_1s_feature(f'{HPC_ROOT_path}\\{label}\\{sample}.csv', f'{FEATURE_PATH}\\1s\\{label}\\{sample}.csv')
+            calculate_1s_feature(
+                f'{HPC_ROOT_path}\\{label}\\{sample}.csv',
+                f'{FEATURE_PATH}\\1s\\{label}\\{sample}.csv',
+                args.hpc_chunksize,
+            )
 
-            calculate_100ms_feature(f'{HPC_ROOT_path}\\{label}\\{sample}.csv', f'{FEATURE_PATH}\\100ms\\{label}\\{sample}.csv')
+            calculate_100ms_feature(
+                f'{HPC_ROOT_path}\\{label}\\{sample}.csv',
+                f'{FEATURE_PATH}\\100ms\\{label}\\{sample}.csv',
+                args.hpc_chunksize,
+            )
             
             calculate_lstm_feature(
                 f'{IRP_ROOT_PATH}\\{label}\\{sample}.txt',

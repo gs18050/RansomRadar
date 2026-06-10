@@ -340,10 +340,40 @@ def detect_lstm_architecture(state_dict: Dict[str, torch.Tensor]) -> Dict[str, i
     }
 
 
-def load_lstm_model(path: Path) -> Tuple[LSTMModel, Dict[str, int]]:
+def trim_lstm_query_information_input(state_dict: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
+    trimmed = dict(state_dict)
+    weight_key = "lstm.weight_ih_l0"
+    if weight_key not in trimmed:
+        raise RuntimeError(f"missing {weight_key} in LSTM state_dict")
+    weight = trimmed[weight_key]
+    if int(weight.shape[1]) != 11:
+        raise RuntimeError(f"can only trim query_information from 11-input LSTM; got {tuple(weight.shape)}")
+    keep_indices = [0, 1, 2, 3, 5, 6, 7, 8, 9, 10]
+    trimmed[weight_key] = weight[:, keep_indices].contiguous()
+    return trimmed
+
+
+def load_lstm_model(path: Path, step3_compatible: bool = False) -> Tuple[LSTMModel, Dict[str, int]]:
     state_dict = torch.load(path, map_location="cpu")
+    compatibility = "none"
+    if step3_compatible:
+        architecture = detect_lstm_architecture(state_dict)
+        if architecture["input_size"] == 11:
+            # code/step3_temporal_correlation_detection.py feeds the 10 scaled
+            # feature channels and omits query_information. Dropping that input
+            # weight column is equivalent to inserting a zero query_information
+            # channel before the original 11-input model.
+            state_dict = trim_lstm_query_information_input(state_dict)
+            compatibility = "trim_query_information_weight_to_10_input"
+
     architecture = detect_lstm_architecture(state_dict)
-    model = LSTMModel(**architecture)
+    architecture["compatibility"] = compatibility
+    model = LSTMModel(
+        input_size=int(architecture["input_size"]),
+        hidden_size=int(architecture["hidden_size"]),
+        num_layers=int(architecture["num_layers"]),
+        num_classes=int(architecture["num_classes"]),
+    )
     model.load_state_dict(state_dict)
     model.eval()
     return model, architecture
@@ -369,6 +399,7 @@ def prepare_lstm_arrays(
     scaler,
     scaler_feature_size: int,
     model_input_size: int,
+    step3_compatible: bool = False,
 ) -> Tuple[np.ndarray, Dict[str, object]]:
     x = scaler.transform(numeric_matrix(df, lstm_features(scaler_feature_size)))
     x = x.reshape(-1, LSTM_STEPS, scaler_feature_size).astype(np.float32)
@@ -377,6 +408,9 @@ def prepare_lstm_arrays(
         "model_input_size": int(model_input_size),
         "mode": "none",
     }
+    if step3_compatible and scaler_feature_size == model_input_size:
+        adapter["mode"] = "step3_compatible_10_feature_input"
+        return x.astype(np.float32), adapter
     if scaler_feature_size == 10 and model_input_size == 11:
         # Original step1 generated query_information between delete and filesize.
         # Some shipped artifacts scale 10-feature rows but keep an 11-input LSTM,
@@ -447,10 +481,18 @@ def build_lstm_prediction(
     return out
 
 
-def load_model_bundle(model_dir: Path, threshold: float, decision_mode: str = "threshold") -> Dict[str, object]:
+def load_model_bundle(
+    model_dir: Path,
+    threshold: float,
+    decision_mode: str = "threshold",
+    step3_compatible: bool = False,
+) -> Dict[str, object]:
     knn_clf = joblib.load(model_dir / "encryption_detection_clf.joblib")
     knn_scaler = joblib.load(model_dir / "encryption_detection_scaler.joblib")
-    lstm_model, lstm_architecture = load_lstm_model(model_dir / "tc_detection_clf.pth")
+    lstm_model, lstm_architecture = load_lstm_model(
+        model_dir / "tc_detection_clf.pth",
+        step3_compatible=step3_compatible,
+    )
     lstm_scaler = joblib.load(model_dir / "tc_detection_scaler.joblib")
     return {
         "model_dir": str(model_dir),
@@ -461,6 +503,7 @@ def load_model_bundle(model_dir: Path, threshold: float, decision_mode: str = "t
         "lstm_architecture": lstm_architecture,
         "threshold": float(threshold),
         "decision_mode": decision_mode,
+        "step3_compatible": bool(step3_compatible),
     }
 
 
@@ -492,6 +535,7 @@ def evaluate_bundle(
         bundle["lstm_scaler"],
         scaler_feature_size,
         model_input_size,
+        step3_compatible=bool(bundle.get("step3_compatible", False)),
     )
     lstm_logits, lstm_scores, lstm_argmax_preds = predict_lstm_outputs(bundle["lstm_model"], x_lstm)
     lstm_pred = build_lstm_prediction(
@@ -677,6 +721,17 @@ def parse_args() -> argparse.Namespace:
             "This does not require --new-run-name or legacy feature directories."
         ),
     )
+    parser.add_argument(
+        "--no-legacy-step3-compatible",
+        dest="legacy_step3_compatible",
+        action="store_false",
+        default=True,
+        help=(
+            "Disable step3-compatible handling for the single shipped models/ LSTM artifact. "
+            "By default, models/ evaluation follows code/step3_temporal_correlation_detection.py "
+            "by using the 10 scaled LSTM features and argmax decision."
+        ),
+    )
     parser.add_argument("--save-predictions", action="store_true")
     return parser.parse_args()
 
@@ -735,6 +790,7 @@ def main() -> int:
                 "fold metrics.json lstm_training.selected_threshold" if legacy_run_dir is not None else None
             ),
             "legacy_model_lstm_decision_mode": "threshold" if legacy_run_dir is not None else "argmax",
+            "legacy_step3_compatible": bool(args.legacy_step3_compatible) if legacy_run_dir is None else False,
             "new_model_lstm_threshold_source": (
                 "fold metrics.json lstm_training.selected_threshold" if new_run_dir is not None else None
             ),
@@ -771,7 +827,12 @@ def main() -> int:
                 args.save_predictions,
             )
         else:
-            legacy_bundle = load_model_bundle(legacy_model_dir, threshold=0.5, decision_mode="argmax")
+            legacy_bundle = load_model_bundle(
+                legacy_model_dir,
+                threshold=0.5,
+                decision_mode="argmax",
+                step3_compatible=bool(args.legacy_step3_compatible),
+            )
             metrics = evaluate_bundle(
                 legacy_bundle,
                 records,

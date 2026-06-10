@@ -647,7 +647,11 @@ def parse_args() -> argparse.Namespace:
             "If omitted, the single shipped models/ artifact is used with threshold 0.5."
         ),
     )
-    parser.add_argument("--new-run-name", required=True)
+    parser.add_argument(
+        "--new-run-name",
+        default=None,
+        help="Training run name for the newly trained model. Not required with --models-on-new-data-only.",
+    )
     parser.add_argument(
         "--new-lstm-dir-name",
         default=None,
@@ -665,6 +669,14 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Evaluate only legacy_model on new_data and new_model on legacy_data.",
     )
+    parser.add_argument(
+        "--models-on-new-data-only",
+        action="store_true",
+        help=(
+            "Evaluate only the single --legacy-model-dir artifact on new_data. "
+            "This does not require --new-run-name or legacy feature directories."
+        ),
+    )
     parser.add_argument("--save-predictions", action="store_true")
     return parser.parse_args()
 
@@ -675,8 +687,16 @@ def main() -> int:
     features_root = Path(args.features_root).resolve()
     legacy_model_dir = Path(args.legacy_model_dir).resolve()
     legacy_run_dir = Path(args.training_runs_dir).resolve() / args.legacy_run_name if args.legacy_run_name else None
-    new_run_dir = Path(args.training_runs_dir).resolve() / args.new_run_name
-    run_prefix = f"{args.legacy_run_name}_vs_{args.new_run_name}" if args.legacy_run_name else args.new_run_name
+    new_run_dir = Path(args.training_runs_dir).resolve() / args.new_run_name if args.new_run_name else None
+    if args.models_on_new_data_only and args.legacy_run_name:
+        raise RuntimeError("--models-on-new-data-only uses the single --legacy-model-dir artifact; omit --legacy-run-name")
+    if not args.models_on_new_data_only and new_run_dir is None:
+        raise RuntimeError("--new-run-name is required unless --models-on-new-data-only is set")
+
+    if args.models_on_new_data_only:
+        run_prefix = "models_on_new_data"
+    else:
+        run_prefix = f"{args.legacy_run_name}_vs_{args.new_run_name}" if args.legacy_run_name else str(args.new_run_name)
     run_name = args.run_name or f"{run_prefix}_cross_eval_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
     output_root = Path(args.output_dir).resolve() / run_name
 
@@ -684,21 +704,20 @@ def main() -> int:
         raise RuntimeError(f"legacy training run directory does not exist: {legacy_run_dir}")
     if legacy_run_dir is None and not legacy_model_dir.exists():
         raise RuntimeError(f"legacy model directory does not exist: {legacy_model_dir}")
-    if not new_run_dir.exists():
+    if new_run_dir is not None and not new_run_dir.exists():
         raise RuntimeError(f"new training run directory does not exist: {new_run_dir}")
 
-    new_run_config = read_run_config(new_run_dir)
+    new_run_config = read_run_config(new_run_dir) if new_run_dir is not None else {}
     legacy_run_config = read_run_config(legacy_run_dir) if legacy_run_dir is not None else {}
     if args.new_lstm_dir_name is None:
-        args.new_lstm_dir_name = str(new_run_config.get("lstm_dir_name", "lstm_process_filtered"))
+        args.new_lstm_dir_name = str(new_run_config.get("lstm_dir_name", "lstm_entropy_process_filtered"))
     if args.legacy_lstm_dir_name is None:
         args.legacy_lstm_dir_name = str(legacy_run_config.get("lstm_dir_name", "lstm"))
 
     sample_process = load_sample_process_map(root)
-    datasets = {
-        "legacy_data": discover_dataset_records(features_root, "legacy", args.legacy_lstm_dir_name),
-        "new_data": discover_dataset_records(features_root, "new", args.new_lstm_dir_name),
-    }
+    datasets = {"new_data": discover_dataset_records(features_root, "new", args.new_lstm_dir_name)}
+    if not args.models_on_new_data_only:
+        datasets["legacy_data"] = discover_dataset_records(features_root, "legacy", args.legacy_lstm_dir_name)
     for dataset_name, records in datasets.items():
         if not records:
             raise RuntimeError(f"{dataset_name} has no paired samples")
@@ -709,15 +728,18 @@ def main() -> int:
             "features_root": str(features_root),
             "legacy_model_dir": str(legacy_model_dir),
             "legacy_run_dir": str(legacy_run_dir) if legacy_run_dir is not None else None,
-            "new_run_dir": str(new_run_dir),
+            "new_run_dir": str(new_run_dir) if new_run_dir is not None else None,
             "legacy_lstm_dir_name": args.legacy_lstm_dir_name,
             "new_lstm_dir_name": args.new_lstm_dir_name,
             "legacy_model_lstm_threshold": (
                 "fold metrics.json lstm_training.selected_threshold" if legacy_run_dir is not None else None
             ),
             "legacy_model_lstm_decision_mode": "threshold" if legacy_run_dir is not None else "argmax",
-            "new_model_lstm_threshold_source": "fold metrics.json lstm_training.selected_threshold",
+            "new_model_lstm_threshold_source": (
+                "fold metrics.json lstm_training.selected_threshold" if new_run_dir is not None else None
+            ),
             "cross_only": args.cross_only,
+            "models_on_new_data_only": args.models_on_new_data_only,
             "dataset_sample_counts": {name: len(records) for name, records in datasets.items()},
         },
     )
@@ -727,11 +749,14 @@ def main() -> int:
     summary: Dict[str, object] = {"legacy_model": {}, "new_model": {}}
 
     print(f"output: {output_root}")
-    print(f"legacy samples: {len(datasets['legacy_data'])}")
+    if "legacy_data" in datasets:
+        print(f"legacy samples: {len(datasets['legacy_data'])}")
     print(f"new samples: {len(datasets['new_data'])}")
 
     legacy_dataset_items = datasets.items()
     if args.cross_only:
+        legacy_dataset_items = [("new_data", datasets["new_data"])]
+    if args.models_on_new_data_only:
         legacy_dataset_items = [("new_data", datasets["new_data"])]
 
     for dataset_name, records in legacy_dataset_items:
@@ -756,6 +781,11 @@ def main() -> int:
             )
             summary["legacy_model"][dataset_name] = metrics
             print(f"legacy_model on {dataset_name}: {format_final_metrics(metrics)}")
+
+    if args.models_on_new_data_only:
+        write_json(output_root / "summary_metrics.json", summary)
+        print(f"summary written: {output_root / 'summary_metrics.json'}")
+        return 0
 
     new_dataset_items = datasets.items()
     if args.cross_only:

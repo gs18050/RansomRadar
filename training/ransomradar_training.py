@@ -791,9 +791,10 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help=(
             "LSTM feature directory name under features root. Default expects output from "
-            "code/step1_5_filter_lstm_ransomware_process.py. Use --lstm-dir-name lstm "
-            "to train with the unfiltered original LSTM features. If --use-write-entropy-features "
-            "is set, the default becomes lstm_entropy_process_filtered."
+            "code/step1_5_filter_lstm_ransomware_process.py and reads "
+            "lstm_entropy_process_filtered. Without --use-write-entropy-features, entropy "
+            "columns in that directory are ignored and only the original LSTM features are used. "
+            "Use --lstm-dir-name lstm or --lstm-dir-name lstm_process_filtered to override."
         ),
     )
     parser.add_argument(
@@ -801,7 +802,7 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help=(
             "Use LSTM features with write_entropy_byte_weighted_avg_i and write_entropy_byte_max_i. "
-            "By default this reads features/lstm_entropy_process_filtered."
+            "The default LSTM directory is features/lstm_entropy_process_filtered."
         ),
     )
     parser.add_argument("--output-dir", default=str(repo_root() / "training_runs"))
@@ -853,7 +854,7 @@ def main() -> int:
     LSTM_FEATURES = [f"{name}_{i}" for i in range(LSTM_STEPS) for name in LSTM_STEP_FEATURES]
 
     if args.lstm_dir_name is None:
-        args.lstm_dir_name = "lstm_entropy_process_filtered" if args.use_write_entropy_features else "lstm_process_filtered"
+        args.lstm_dir_name = "lstm_entropy_process_filtered"
 
     if args.lstm_train_negative_positive_ratio is not None and args.lstm_train_negative_positive_ratio <= 0:
         raise ValueError("--lstm-train-negative-positive-ratio must be greater than 0")
